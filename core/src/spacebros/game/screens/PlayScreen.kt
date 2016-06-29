@@ -41,8 +41,9 @@ class PlayScreen : Screen {
     }
 
     override fun resize(width: Int, height: Int) {
-        cam.viewportWidth = 30f;
-        cam.viewportHeight = 30f * height/width;
+        // TODO: camsize: attach to renderSystem?
+        cam.viewportWidth = 20f;
+        cam.viewportHeight = 20f * height/width;
         cam.update()
     }
 
@@ -90,6 +91,9 @@ class PlayScreen : Screen {
         }
         if (input.isKeyPressed(Input.Keys.E)) {
             cam.rotate(rotationSpeed, 0f, 0f, 1f);
+        }
+        if (input.isKeyPressed(Input.Keys.NUMPAD_0)) {
+            println("Camera position: ${cam.position}")
         }
         // TODO: 100 == renderSystem.worldWidth
         cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);

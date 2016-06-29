@@ -22,7 +22,8 @@ class RenderSystem : IteratingSystem(aspects) {
 
     val batch = SpriteBatch()
     val worldSprite = Sprite()
-    val camera = OrthographicCamera()
+//    val camera = OrthographicCamera()
+    val camera: OrthographicCamera
 
     val worldHeight = 100f
     val worldWidth  = 100f
@@ -36,8 +37,9 @@ class RenderSystem : IteratingSystem(aspects) {
 
         // Constructs a new OrthographicCamera, using the given viewport width and height
         // Height is multiplied by aspect ratio.
-        camera.setToOrtho(false, 30f, 30f * (h / w))
-        camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0f);
+        camera = OrthographicCamera(20f, 20f * (h / w))
+        // Position camera in upper left hand corner of worldSprite
+        camera.position.set(camera.viewportWidth / 2f, worldHeight - (camera.viewportHeight / 2f), 0f)
         camera.update()
     }
 
