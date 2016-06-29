@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" nextobjectid="2">
+ <tileset firstgid="1" name="Humans" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <properties>
+   <property name="entity" value="human"/>
+  </properties>
+  <image source="../icons/mob/human.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="257" name="Alien Queen" tilewidth="64" tileheight="64" tilecount="9" columns="3">
+  <image source="../icons/mob/alienqueen.png" width="192" height="192"/>
+ </tileset>
+ <tileset firstgid="266" name="Floors" tilewidth="32" tileheight="32" tilecount="756" columns="28">
+  <image source="../icons/turf/floors.png" width="896" height="864"/>
+ </tileset>
+ <tileset firstgid="1022" name="Walls" tilewidth="32" tileheight="32" tilecount="342" columns="19">
+  <properties>
+   <property name="entity" value="wall"/>
+  </properties>
+  <image source="../icons/turf/walls.png" width="608" height="576"/>
+ </tileset>
+ <tileset firstgid="1364" name="Closets" tilewidth="32" tileheight="32" tilecount="324" columns="18">
+  <image source="../icons/obj/closet.png" width="576" height="576"/>
+  <tile id="0">
+   <properties>
+    <property name="entity" value="gray_locker"/>
+   </properties>
+  </tile>
+  <tile id="63">
+   <properties>
+    <property name="entity" value="locker"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="1688" name="Computers" tilewidth="32" tileheight="32" tilecount="484" columns="22">
+  <image source="../icons/obj/computer.png" width="704" height="704"/>
+  <tile id="63">
+   <properties>
+    <property name="entity" value="arcade_machine"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="2172" name="Devices" tilewidth="32" tileheight="32" tilecount="169" columns="13">
+  <image source="../icons/obj/device.png" width="416" height="416"/>
+  <tile id="130">
+   <properties>
+    <property name="entity" value="multi_tool"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="2341" name="Food" tilewidth="32" tileheight="32" tilecount="240" columns="16">
+  <image source="../icons/obj/food.png" width="512" height="480"/>
+  <tile id="0">
+   <properties>
+    <property name="entity" value="donut"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="2581" name="Kitchen" tilewidth="32" tileheight="32" tilecount="49" columns="7">
+  <image source="../icons/obj/kitchen.png" width="224" height="224"/>
+ </tileset>
+ <tileset firstgid="2630" name="Monitors" tilewidth="32" tileheight="32" tilecount="420" columns="21">
+  <image source="../icons/obj/monitors.png" width="672" height="640"/>
+  <tile id="105">
+   <properties>
+    <property name="entity" value="hvac"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="3050" name="Misc Objects" tilewidth="32" tileheight="32" tilecount="240" columns="16">
+  <image source="../icons/obj/objects.png" width="512" height="480"/>
+ </tileset>
+ <tileset firstgid="3290" name="Structures" tilewidth="32" tileheight="32" tilecount="240" columns="16">
+  <image source="../icons/obj/structures.png" width="512" height="480"/>
+ </tileset>
+ <tileset firstgid="3530" name="Command Doors" tilewidth="32" tileheight="32" tilecount="56" columns="8">
+  <image source="../icons/obj/doors/Doorcomglass.png" width="256" height="224"/>
+  <tile id="0">
+   <properties>
+    <property name="entity" value="command_door"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="3586" name="Security Door" tilewidth="32" tileheight="32" tilecount="56" columns="8">
+  <image source="../icons/obj/doors/Doorsecglass.png" width="256" height="224"/>
+  <tile id="0">
+   <properties>
+    <property name="entity" value="security_door"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Floor Layer" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt1UEKgzAQQFEtXUnvf4/esKtSLTVxNNGBvgezkiDkk2QYgJppjM/aeo7TIxc9ctnT46z5R1fvuR5LTe+re7t/6NHv/dBjOz1y0SO3Hvuhx3565PK4faYVPeLmHb7nKD3iSj2e4/q8lb7pETff/+nH+Sg1qbXSI652Xzkf5/J+5NKzBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADbvQDxKSsl
+  </data>
+ </layer>
+ <layer name="Wall Layer" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt10EOgyAQBVAXHs/7n6fdtDGprciMdYjvJSyHAD8MYZooZw6Mp2X+HAT0nt8qjzV5BMmjlkAeW/1pifS/H33xNqrvt/r6slXfb/X1ZUvuV+85s3qOPA7VNb3n8mgnj1rkUcter8/4n8uj31Ye2XP+q3ZkLfcjMvcVtSPb2/dVf2x59NV+q5dHn5b70TuvPI6L5OF+5PN+1HJWv3rVXpHlyJwLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3NoDmaAKgQ==
+  </data>
+ </layer>
+ <layer name="Structures" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt1DEKhEAMBdBptBD3eB5Oi9W11EK8mUcwMO2C2KjgexBSJvBJUgLO+n1SWuvc/+mqa/d5uyFy2Mrcud83cmijenlcbvF7Hq8p7ps9xU2OUbPbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLQDtu8KPA==
+  </data>
+ </layer>
+ <layer name="Items" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt1jEKwkAQBdBBiGhIrAVJmRt5rxQ5kL0XyG2CikiQVAF1V30PPgPLsnyYZiOApU71svvHIqIv7hMgN+f6efI542Z+9q597MuI5ppD+dp3IZV2m7oB5GtYT4Ffd/szPQLwbVa71A3+W1elbgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQO4uPzsM3A==
+  </data>
+ </layer>
+ <layer name="People" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztzrEJADAMBLHH42Rpr+omE6QxBKm59hLgRW8PAAB85tzW6gUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQDXOQAzA==
+  </data>
+ </layer>
+ <objectgroup name="Spawn Areas">
+  <object id="1" name="greenlands spawn area" type="spawn_zone" x="128" y="448" width="224" height="192"/>
+ </objectgroup>
+ <objectgroup name="Containers"/>
+</map>
