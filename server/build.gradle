@@ -1,0 +1,38 @@
+apply plugin: 'kotlin'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+sourceCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+sourceSets.main.java.srcDirs = ["src/"]
+sourceSets.main.kotlin.srcDirs = ["src/"]
+
+
+eclipse.project {
+    name = appName + "-server"
+}
+
+mainClassName = 'io.vertx.core.Launcher'
+def mainVerticleName = 'spacebros.server.MainServerVerticle'
+
+run {
+    args = ['run', mainVerticleName,
+            "--launcher-class=$mainClassName",
+            "--redeploy=src/**/*.*",
+            "--on-redeploy=../gradlew :server:classes"
+    ]
+}
+
+// Naming and packaging settings for the "shadow jar".
+shadowJar {
+    baseName = 'app'
+    classifier = 'shadow'
+
+    manifest {
+        attributes 'Main-Verticle': mainVerticleName
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}

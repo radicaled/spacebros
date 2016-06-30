@@ -108,8 +108,8 @@ class PlayScreen : Screen {
 
     fun loadMap() {
         val map = TmxMapLoader().load("maps/shit_station-1.tmx")
-        val tileWidth = 32
-        val tileHeight = 32
+//        val tileWidth = 32
+//        val tileHeight = 32
 
         map.layers.forEach { layer ->
             when(layer) {
