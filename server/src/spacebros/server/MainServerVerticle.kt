@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.ext.web.Router
+import spacebros.server.game.GameVerticle
 
 @Suppress("unused")
 class MainServerVerticle : AbstractVerticle() {
