@@ -57,7 +57,7 @@ class GameVerticle : AbstractVerticle() {
 
     fun createNewPlayer(websocket: ServerWebSocket): Player {
         val type     = TypeComponent().apply { name = "player" }
-        val position = PositionComponent().apply { x = 5; y = 7; }
+        val position = PositionComponent().apply { x = 5; y = 91; }
         val graphic  = TileGraphicComponent().apply { graphicFile = "icons/mob/human.png"; tileId = 193 }
         val entityId = world.createEntity().edit()
                 .add(position)
