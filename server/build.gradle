@@ -15,11 +15,13 @@ eclipse.project {
 
 mainClassName = 'io.vertx.core.Launcher'
 def mainVerticleName = 'spacebros.server.MainServerVerticle'
+// Doesn't actually work...
+def networkPath = System.getProperty("user.dir") + "/network/src/**/*.*"
 
 run {
     args = ['run', mainVerticleName,
             "--launcher-class=$mainClassName",
-            "--redeploy=src/**/*.*",
+            "--redeploy=src/**/*.*,$networkPath",
             "--on-redeploy=../gradlew :server:classes"
     ]
 }
