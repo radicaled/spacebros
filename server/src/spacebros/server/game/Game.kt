@@ -3,9 +3,13 @@ package spacebros.server.game
 import com.artemis.Aspect
 import com.artemis.World
 import com.artemis.WorldConfigurationBuilder
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.JsonObject
+import spacebros.networking.Messages
 import spacebros.server.game.components.PositionComponent
 import spacebros.server.game.components.TileGraphicComponent
 import spacebros.server.game.components.TypeComponent
@@ -21,6 +25,9 @@ class GameVerticle : AbstractVerticle() {
     val players     = arrayListOf<Player>()
     val world: World
     var lastTickAt = LocalDateTime.MIN
+    val mapper = jacksonObjectMapper().registerKotlinModule().apply {
+        enable(SerializationFeature.INDENT_OUTPUT)
+    }
 
     init {
         val config = WorldConfigurationBuilder()
@@ -85,13 +92,19 @@ class GameVerticle : AbstractVerticle() {
         val tc = entity.getComponent(TypeComponent::class.java)
         val pc = entity.getComponent(PositionComponent::class.java)
         val tg = entity.getComponent(TileGraphicComponent::class.java)
-        val json = JsonObject(mapOf(
-                "type" to tc.name,
-                "position" to mapOf("x" to pc.x, "y" to pc.y),
-                "graphic" to mapOf("tileId" to tg.tileId, "file" to tg.graphicFile)
-
-        ))
-        websocket.writeFinalTextFrame(json.encodePrettily())
+        val message = Messages.CreateEntity(entityId,
+                    type = tc.name,
+                    position = Messages.Position(pc.x, pc.y),
+                    graphic = Messages.Graphic(tg.tileId, tg.graphicFile)
+                )
+//        mapper.writeValueAsString(message)
+//        val json = JsonObject(mapOf(
+//                "type" to tc.name,
+//                "position" to mapOf("x" to pc.x, "y" to pc.y),
+//                "graphic" to mapOf("tileId" to tg.tileId, "file" to tg.graphicFile)
+//
+//        ))
+        websocket.writeFinalTextFrame(Messages.encode(message))
     }
 
     fun bootstrapMap() {

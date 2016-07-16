@@ -18,10 +18,12 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpClientOptions
+import io.vertx.core.http.WebSocketFrame
 import io.vertx.core.json.JsonObject
 import spacebros.game.components.PositionComponent
 import spacebros.game.components.RenderableComponent
 import spacebros.game.systems.RenderSystem
+import spacebros.networking.Messages
 
 class RemotePlayScreen : Screen {
     val cam: OrthographicCamera
@@ -58,37 +60,44 @@ class RemotePlayScreen : Screen {
         client.websocket(8080, "localhost", "/gameStream") { websocket ->
             websocket.frameHandler {
                 Gdx.app.postRunnable {
-                    // println("Got data: ${it.textData()}")
-                    val data = JsonObject(it.textData())
-                    val file = data.getJsonObject("graphic").getString("file").trimStart('.', '/')
-                    val tileId = data.getJsonObject("graphic").getInteger("tileId")
-                    val texture = loadTileAsset(file)
-                    // TODO: everything 32x32?
-                    val frameWidth = 32f
-                    val frameHeight = 32f
-                    val frameX = ((tileId * frameWidth) % texture.width).toInt()
-                    val frameY = (Math.floor(((tileId * frameWidth) / texture.width).toDouble()) * frameHeight).toInt()
-
-                    val textureRegion = TextureRegion(texture, frameX, frameY, frameWidth.toInt(), frameHeight.toInt())
-
-                    val x = data.getJsonObject("position").getInteger("x").toFloat()
-                    val y = data.getJsonObject("position").getInteger("y").toFloat()
-
-                    if (file == "icons/obj/closet.png") {
-                        println("Localized tile ID: ${tileId}")
-                        println("Pixel: ${frameX}, ${frameY}")
-                        println("Frame location: ${frameX / 32f}, ${frameY / 32f}")
+                     println("Got data: ${it.textData()}")
+                    val message = Messages.decode(it.textData())
+                    when(message) {
+                        is Messages.CreateEntity -> createEntity(message)
+                        else -> println("Unknown message type: ${it.textData()} (${message.javaClass})")
                     }
-
-                    val rc = RenderableComponent().apply { this.textureRegion = textureRegion }
-                    val pc = PositionComponent().apply { this.vector = Vector2(x,y) }
-                    world.createEntity().edit()
-                            .add(rc)
-                            .add(pc)
                 }
 
             }
         }
+    }
+
+    private fun createEntity(message: Messages.CreateEntity) {
+        val file = message.graphic.file.trimStart('.', '/')
+        val tileId = message.graphic.tileId
+        val texture = loadTileAsset(file)
+        // TODO: everything 32x32?
+        val frameWidth = 32f
+        val frameHeight = 32f
+        val frameX = ((tileId * frameWidth) % texture.width).toInt()
+        val frameY = (Math.floor(((tileId * frameWidth) / texture.width).toDouble()) * frameHeight).toInt()
+
+        val textureRegion = TextureRegion(texture, frameX, frameY, frameWidth.toInt(), frameHeight.toInt())
+
+        val x = message.position.x.toFloat()
+        val y = message.position.y.toFloat()
+
+        if (file == "icons/obj/closet.png") {
+            println("Localized tile ID: ${tileId}")
+            println("Pixel: ${frameX}, ${frameY}")
+            println("Frame location: ${frameX / 32f}, ${frameY / 32f}")
+        }
+
+        val rc = RenderableComponent().apply { this.textureRegion = textureRegion }
+        val pc = PositionComponent().apply { this.vector = Vector2(x, y) }
+        world.createEntity().edit()
+                .add(rc)
+                .add(pc)
     }
 
     fun handleInput() {

@@ -53,6 +53,7 @@ project(":core") {
 
 
     dependencies {
+        compile project(":network")
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         compile "com.kotcrab.vis:vis-ui:1.0.1"
@@ -71,9 +72,25 @@ project(":server") {
     apply plugin: "kotlin"
 
     dependencies {
+        compile project(":network")
         compile "io.vertx:vertx-core:$vertx_version"
         compile "io.vertx:vertx-web:$vertx_version"
         compile "net.onedaybeard.artemis:artemis-odb:1.4.0"
+
+        compile "com.fasterxml.jackson.core:jackson-databind:2.8.0"
+        compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.0"
+
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
+    }
+}
+
+project(":network") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        compile "com.fasterxml.jackson.core:jackson-databind:2.8.0"
+        compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.0"
 
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
         compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
