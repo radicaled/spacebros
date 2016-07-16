@@ -106,18 +106,11 @@ class GameVerticle : AbstractVerticle() {
                     (0..layer.height - 1).forEach { y ->
                         (0..layer.width - 1).forEach { x ->
                             val tileId = layer.getCell(x, y)
-                            if (x == 19 && y == 2 && layer.name == "Items") {
-                                println("The tileGid at $x,$y is: ${tileId}")
-                            }
                             if (tileId != null && tileId > 0) {
                                 val flipY = true
                                 val tile = tiledMap.getTile(tileId)
                                 if (tile !is EmptyTile) {
                                     val localTileId = tile.localTileId
-                                    if (tile.tileset.name == "Closets") {
-                                        println("Found tile: (gid) ${tile.gid} (local) ${localTileId}")
-                                        println("$x, $y")
-                                    }
                                     // Ternary operators? What are those?!
                                     // A man just needs 200 bytes of RAM and his bootstraps, lemme tell you.
                                     val actualValueOfYBecauseStupidProgrammingThings = if (flipY) {
