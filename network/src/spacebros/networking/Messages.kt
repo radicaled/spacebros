@@ -26,6 +26,13 @@ object Messages {
 
     data class Graphic(val tileId: Int, val file: String)
 
+    enum class Direction {
+        NORTH,
+        SOUTH,
+        EAST,
+        WEST
+    }
+
     @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
     interface RootMessage
 
@@ -34,5 +41,7 @@ object Messages {
                             val graphic: Graphic) : RootMessage
 
     data class SetCamera(val position: Position) : RootMessage
+
+    data class Move(val direction: Direction) : RootMessage
 }
 

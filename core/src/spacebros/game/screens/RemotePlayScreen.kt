@@ -16,9 +16,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpClient
-import io.vertx.core.http.HttpClientOptions
-import io.vertx.core.http.WebSocketFrame
+import io.vertx.core.http.*
 import io.vertx.core.json.JsonObject
 import spacebros.game.components.PositionComponent
 import spacebros.game.components.RenderableComponent
@@ -34,6 +32,8 @@ class RemotePlayScreen : Screen {
     val world: World
 
     val assetManager = AssetManager()
+
+    val vertx = Vertx.vertx()
 
     init {
         val config = WorldConfigurationBuilder()
@@ -56,8 +56,20 @@ class RemotePlayScreen : Screen {
     private fun connectToServerRightNowGoddamnIt() {
 //        Vertx.vertx().deployVerticle(verticle)
         val opts = HttpClientOptions().setLogActivity(true)
-        val client = Vertx.vertx().createHttpClient(opts)
+        val client = vertx.createHttpClient(opts)
         client.websocket(8080, "localhost", "/gameStream") { websocket ->
+            vertx.eventBus().addInterceptor {
+                when(it.message().address()) {
+                    "network" -> {
+                        val msg = it.message().body()
+                        if (msg is String)
+                            websocket.writeFinalTextFrame(msg)
+                        else
+                            println("Unkonwn message type: ${msg.javaClass}")
+                    }
+                    else -> it.next()
+                }
+            }
             websocket.frameHandler {
                 Gdx.app.postRunnable {
                      println("Got data: ${it.textData()}")
@@ -71,6 +83,10 @@ class RemotePlayScreen : Screen {
 
             }
         }
+    }
+
+    fun queueNetworkMessage(message: Messages.RootMessage) {
+        vertx.eventBus().send("network", Messages.encode(message))
     }
 
     private fun createEntity(message: Messages.CreateEntity) {
@@ -106,41 +122,53 @@ class RemotePlayScreen : Screen {
     }
 
     fun handleInput() {
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            cam.zoom += 0.02f;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            cam.zoom -= 0.02f;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            cam.translate(-3f, 0f, 0f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            cam.translate(3f, 0f, 0f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            cam.translate(0f, -3f, 0f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            cam.translate(0f, 3f, 0f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            cam.rotate(-rotationSpeed, 0f, 0f, 1f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-            cam.rotate(rotationSpeed, 0f, 0f, 1f);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.NUMPAD_0)) {
-            println("Camera position: ${cam.position}")
-        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//            cam.zoom += 0.02f;
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+//            cam.zoom -= 0.02f;
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+//            cam.translate(-3f, 0f, 0f);
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+//            cam.translate(3f, 0f, 0f);
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+//            cam.translate(0f, -3f, 0f);
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+//            cam.translate(0f, 3f, 0f);
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+//            cam.rotate(-rotationSpeed, 0f, 0f, 1f);
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+//            cam.rotate(rotationSpeed, 0f, 0f, 1f);
+//        }
+//        if (Gdx.input.isKeyPressed(Input.Keys.NUMPAD_0)) {
+//            println("Camera position: ${cam.position}")
+//        }
         // TODO: 100 == renderSystem.worldWidth
-        cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);
-
-        val effectiveViewportWidth = cam.viewportWidth * cam.zoom;
-        val effectiveViewportHeight = cam.viewportHeight * cam.zoom;
-
-        cam.position.x = MathUtils.clamp(cam.position.x, effectiveViewportWidth / 2f, 100 - effectiveViewportWidth / 2f);
-        cam.position.y = MathUtils.clamp(cam.position.y, effectiveViewportHeight / 2f, 100 - effectiveViewportHeight / 2f);
+//        cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);
+//
+//        val effectiveViewportWidth = cam.viewportWidth * cam.zoom;
+//        val effectiveViewportHeight = cam.viewportHeight * cam.zoom;
+//
+//        cam.position.x = MathUtils.clamp(cam.position.x, effectiveViewportWidth / 2f, 100 - effectiveViewportWidth / 2f);
+//        cam.position.y = MathUtils.clamp(cam.position.y, effectiveViewportHeight / 2f, 100 - effectiveViewportHeight / 2f);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+            queueNetworkMessage(Messages.Move(Messages.Direction.WEST))
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+            queueNetworkMessage(Messages.Move(Messages.Direction.EAST))
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            queueNetworkMessage(Messages.Move(Messages.Direction.SOUTH))
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            queueNetworkMessage(Messages.Move(Messages.Direction.NORTH))
+        }
     }
     override fun show() {
 

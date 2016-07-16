@@ -1,8 +1,6 @@
 package spacebros.server.game
 
-import com.artemis.Aspect
-import com.artemis.World
-import com.artemis.WorldConfigurationBuilder
+import com.artemis.*
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
@@ -26,10 +24,18 @@ class GameVerticle : AbstractVerticle() {
     val world: World
     var lastTickAt = LocalDateTime.MIN
 
+    val playerArchetype: Archetype
+
+
     init {
         val config = WorldConfigurationBuilder()
                 .build()
         world = World(config)
+        playerArchetype = ArchetypeBuilder()
+                .add(TypeComponent::class.java)
+                .add(PositionComponent::class.java)
+                .add(TileGraphicComponent::class.java)
+                .build(world)
     }
 
     override fun start() {
@@ -52,7 +58,7 @@ class GameVerticle : AbstractVerticle() {
         connections.add(websocket)
         players.add(player)
         synchronizePlayer(player)
-        websocket.frameHandler { handleMessage(player, JsonObject(it.textData())) }
+        websocket.frameHandler { handleMessage(player, it.textData()) }
         websocket.closeHandler {
             players.remove(player)
             connections.remove(websocket)
@@ -60,21 +66,49 @@ class GameVerticle : AbstractVerticle() {
     }
 
     fun createNewPlayer(websocket: ServerWebSocket): Player {
-        val type     = TypeComponent().apply { name = "player" }
-        val position = PositionComponent().apply { x = 5; y = 91; }
-        val graphic  = TileGraphicComponent().apply { graphicFile = "icons/mob/human.png"; tileId = 193 }
-        val entityId = world.createEntity().edit()
-                .add(position)
-                .add(type)
-                .add(graphic)
-                .entityId
+//        val type     = TypeComponent().apply { name = "player" }
+//        val position = PositionComponent().apply { x = 5; y = 91; }
+//        val graphic  = TileGraphicComponent().apply { graphicFile = "icons/mob/human.png"; tileId = 193 }
+//        val entityId = world.createEntity().edit()
+//                .add(position)
+//                .add(type)
+//                .add(graphic)
+//                .entityId
+
+        val entityId = world.create(playerArchetype)
+        world.getEntity(entityId).apply {
+            getComponent(TypeComponent::class.java).apply { name = "player" }
+            getComponent(PositionComponent::class.java).apply { x = 5; y = 91 }
+            getComponent(TileGraphicComponent::class.java).apply { graphicFile = "icons/mob/human.png"; tileId = 193 }
+        }
+
         return Player(entityId, websocket)
     }
 
-    fun handleMessage(player: Player, data: JsonObject) {
+    fun handleMessage(player: Player, data: String) {
         // TODO: enable player movement around
         println("Got a message from $player: $data")
+        val message = Messages.decode(data)
+        when(message) {
+            is Messages.Move -> handleMovement(player, message)
+        }
+
     }
+
+    private fun handleMovement(player: Player, message: Messages.Move) {
+        val entity = world.getEntity(player.entityId)
+        val pc = entity.getComponent(PositionComponent::class.java)
+        when(message.direction) {
+            Messages.Direction.NORTH -> pc.y += 1
+            Messages.Direction.SOUTH -> pc.y -= 1
+            Messages.Direction.EAST -> pc.x += 1
+            Messages.Direction.WEST -> pc.x -= 1
+        }
+        val setCamera = Messages.SetCamera(Messages.Position(pc.x, pc.y))
+        player.websocket.writeFinalTextFrame(Messages.encode(setCamera))
+        world.createEntity()
+    }
+
 
     fun synchronizePlayer(player: Player) {
         // TODO: don't sync all entities.
