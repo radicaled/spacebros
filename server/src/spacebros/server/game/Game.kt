@@ -25,9 +25,6 @@ class GameVerticle : AbstractVerticle() {
     val players     = arrayListOf<Player>()
     val world: World
     var lastTickAt = LocalDateTime.MIN
-    val mapper = jacksonObjectMapper().registerKotlinModule().apply {
-        enable(SerializationFeature.INDENT_OUTPUT)
-    }
 
     init {
         val config = WorldConfigurationBuilder()
