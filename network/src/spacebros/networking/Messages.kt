@@ -15,7 +15,7 @@ object Messages {
 //    fun encode(message: Any): String = mapper.writeValueAsString(message)
 //    fun decode(message: String): Any = mapper.readValue(message, typeMap)
 
-    fun encode(message: Any): String = mapper.writeValueAsString(message)
+    fun encode(message: RootMessage): String = mapper.writeValueAsString(message)
     fun decode(message: String): Any = mapper.readValue(message, RootMessage::class.java)
 
     data class Position(val x: Int, val y: Int) {
@@ -32,5 +32,7 @@ object Messages {
     data class CreateEntity(val entityId: Int, val type: String,
                             val position: Position,
                             val graphic: Graphic) : RootMessage
+
+    data class SetCamera(val position: Position) : RootMessage
 }
 

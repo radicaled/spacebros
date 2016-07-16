@@ -64,6 +64,7 @@ class RemotePlayScreen : Screen {
                     val message = Messages.decode(it.textData())
                     when(message) {
                         is Messages.CreateEntity -> createEntity(message)
+                        is Messages.SetCamera -> setCamera(message)
                         else -> println("Unknown message type: ${it.textData()} (${message.javaClass})")
                     }
                 }
@@ -98,6 +99,10 @@ class RemotePlayScreen : Screen {
         world.createEntity().edit()
                 .add(rc)
                 .add(pc)
+    }
+
+    private fun setCamera(message: Messages.SetCamera) {
+        cam.position.set(message.position.x.toFloat(), message.position.y.toFloat(), 0f)
     }
 
     fun handleInput() {

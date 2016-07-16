@@ -85,6 +85,11 @@ class GameVerticle : AbstractVerticle() {
         entities.data.forEach { entityId ->
             sendEntity(player.websocket, entityId)
         }
+        // Set the camera to their player's position?
+        val entity = world.getEntity(player.entityId)
+        val pc = entity.getComponent(PositionComponent::class.java)
+        val msg = Messages.SetCamera(Messages.Position(pc.x, pc.y))
+        player.websocket.writeFinalTextFrame(Messages.encode(msg))
     }
 
     fun sendEntity(websocket: ServerWebSocket, entityId: Int) {
@@ -97,13 +102,6 @@ class GameVerticle : AbstractVerticle() {
                     position = Messages.Position(pc.x, pc.y),
                     graphic = Messages.Graphic(tg.tileId, tg.graphicFile)
                 )
-//        mapper.writeValueAsString(message)
-//        val json = JsonObject(mapOf(
-//                "type" to tc.name,
-//                "position" to mapOf("x" to pc.x, "y" to pc.y),
-//                "graphic" to mapOf("tileId" to tg.tileId, "file" to tg.graphicFile)
-//
-//        ))
         websocket.writeFinalTextFrame(Messages.encode(message))
     }
 
