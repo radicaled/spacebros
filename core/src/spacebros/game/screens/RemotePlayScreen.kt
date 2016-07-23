@@ -77,7 +77,7 @@ class RemotePlayScreen : Screen {
             }
             websocket.frameHandler {
                 Gdx.app.postRunnable {
-                     println("Got data: ${it.textData()}")
+//                    println("Got data: ${it.textData()}")
                     val message = Messages.decode(it.textData())
                     when(message) {
                         is Messages.CreateEntity -> createEntity(message)
@@ -111,9 +111,9 @@ class RemotePlayScreen : Screen {
         val y = message.position.y.toFloat()
 
         if (file == "icons/obj/closet.png") {
-            println("Localized tile ID: ${tileId}")
-            println("Pixel: ${frameX}, ${frameY}")
-            println("Frame location: ${frameX / 32f}, ${frameY / 32f}")
+//            println("Localized tile ID: ${tileId}")
+//            println("Pixel: ${frameX}, ${frameY}")
+//            println("Frame location: ${frameX / 32f}, ${frameY / 32f}")
         }
 
         val entityId = world.create()
@@ -228,7 +228,7 @@ class ClientVerticle : AbstractVerticle() {
         val client = vertx.createHttpClient(opts)
         client.websocket(8080, "localhost", "/gameStream") { websocket ->
             websocket.frameHandler {
-                println("Got data: $it")
+//                println("Got data: $it")
             }
         }
     }
