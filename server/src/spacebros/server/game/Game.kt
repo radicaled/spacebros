@@ -47,7 +47,7 @@ class GameVerticle : AbstractVerticle() {
     override fun start() {
         bootstrapMap()
         lastTickAt = LocalDateTime.now()
-        vertx.setPeriodic(250) {
+        vertx.setPeriodic(1) {
             val delta = Duration.between(lastTickAt, LocalDateTime.now()).toMillis()
             tick(delta.toFloat())
             lastTickAt = LocalDateTime.now()
