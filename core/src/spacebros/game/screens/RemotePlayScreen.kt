@@ -36,7 +36,7 @@ class RemotePlayScreen : Screen {
 
     val assetManager = AssetManager()
 
-    val vertx = Vertx.vertx()
+    val vertx: Vertx = Vertx.vertx()
 
     val entityHub = EntityHub()
 
