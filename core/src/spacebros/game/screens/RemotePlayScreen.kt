@@ -15,6 +15,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.ui.Skin
+import com.badlogic.gdx.utils.viewport.ScreenViewport
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
 import io.vertx.core.http.*
@@ -24,13 +27,13 @@ import spacebros.game.components.PositionComponent
 import spacebros.game.components.RemoteEntityComponent
 import spacebros.game.components.RenderableComponent
 import spacebros.game.systems.RenderSystem
+import spacebros.game.ui.MainInterface
 import spacebros.networking.Messages
 
 class RemotePlayScreen : Screen {
     val cam: OrthographicCamera
 
     val rotationSpeed = 0.5f
-    val verticle: ClientVerticle
 
     val world: World
 
@@ -40,7 +43,13 @@ class RemotePlayScreen : Screen {
 
     val entityHub = EntityHub()
 
+    val stage: Stage
+
+    val screenViewport = ScreenViewport()
+    val mainInterface: MainInterface
     init {
+        // TODO: clean up this entire block, it's a real mess
+
         val config = WorldConfigurationBuilder()
                 .with(RenderSystem())
                 .build()
@@ -48,8 +57,19 @@ class RemotePlayScreen : Screen {
 
         cam = world.getSystem(RenderSystem::class.java).camera
 
-        verticle = ClientVerticle()
+        stage = Stage(screenViewport)
+        Gdx.input.inputProcessor = stage
+
+        mainInterface = MainInterface(stage, assetManager)
+
+        loadRegularAssets()
+        mainInterface.setup()
         connectToServerRightNowGoddamnIt()
+    }
+
+    private fun loadRegularAssets() {
+        assetManager.load("ui/skins/uiskin.json", Skin::class.java)
+        assetManager.finishLoading()
     }
 
     fun loadTileAsset(fileName: String): Texture {
@@ -199,6 +219,8 @@ class RemotePlayScreen : Screen {
         cam.viewportWidth = 20f
         cam.viewportHeight = 20f * height/width
         cam.update()
+
+        screenViewport.update(width, height, true)
     }
 
     override fun hide() {
@@ -207,8 +229,13 @@ class RemotePlayScreen : Screen {
 
     override fun render(delta: Float) {
         handleInput()
+
         world.delta = delta
         world.process()
+
+        stage.act(delta)
+        stage.draw()
+
         cam.update()
     }
 
@@ -217,19 +244,6 @@ class RemotePlayScreen : Screen {
     }
 
     override fun dispose() {
-
-    }
-}
-
-// TODO: don't use me yet
-class ClientVerticle : AbstractVerticle() {
-    override fun start() {
-        val opts = HttpClientOptions().setLogActivity(true)
-        val client = vertx.createHttpClient(opts)
-        client.websocket(8080, "localhost", "/gameStream") { websocket ->
-            websocket.frameHandler {
-//                println("Got data: $it")
-            }
-        }
+        stage.dispose()
     }
 }
