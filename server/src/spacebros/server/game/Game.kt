@@ -1,6 +1,7 @@
 package spacebros.server.game
 
 import com.artemis.*
+import com.artemis.managers.TagManager
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
@@ -8,12 +9,14 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.JsonObject
 import spacebros.networking.Messages
+import spacebros.server.game.components.MovementComponent
 import spacebros.server.game.components.PositionComponent
 import spacebros.server.game.components.TileGraphicComponent
 import spacebros.server.game.components.TypeComponent
 import spacebros.server.game.components.map.EmptyTile
 import spacebros.server.game.components.map.TileLayer
 import spacebros.server.game.components.map.TiledMap
+import spacebros.server.game.systems.MoveSystem
 import java.io.File
 import java.time.Duration
 import java.time.LocalDateTime
@@ -26,9 +29,12 @@ class GameVerticle : AbstractVerticle() {
 
     val playerArchetype: Archetype
 
+    val connectionHub = ConnectionHub()
 
     init {
         val config = WorldConfigurationBuilder()
+                .with(TagManager())
+                .with(MoveSystem(connectionHub))
                 .build()
         world = World(config)
         playerArchetype = ArchetypeBuilder()
@@ -55,13 +61,13 @@ class GameVerticle : AbstractVerticle() {
 
     fun acceptRemoteConnection(websocket: ServerWebSocket) {
         val player = createNewPlayer(websocket)
-        connections.add(websocket)
+        connectionHub.register(player.entityId, websocket)
         players.add(player)
         synchronizePlayer(player)
         websocket.frameHandler { handleMessage(player, it.textData()) }
         websocket.closeHandler {
             players.remove(player)
-            connections.remove(websocket)
+            connectionHub.unregister(player.entityId)
         }
     }
 
@@ -81,6 +87,7 @@ class GameVerticle : AbstractVerticle() {
             getComponent(PositionComponent::class.java).apply { x = 5; y = 91 }
             getComponent(TileGraphicComponent::class.java).apply { graphicFile = "icons/mob/human.png"; tileId = 193 }
         }
+//        world.getSystem(TagManager::class.java).register("PLAYER", entityId)
 
         return Player(entityId, websocket)
     }
@@ -90,23 +97,13 @@ class GameVerticle : AbstractVerticle() {
         println("Got a message from $player: $data")
         val message = Messages.decode(data)
         when(message) {
-            is Messages.Move -> handleMovement(player, message)
+            is Messages.MoveDirection -> handleMovement(player, message)
         }
 
     }
 
-    private fun handleMovement(player: Player, message: Messages.Move) {
-        val entity = world.getEntity(player.entityId)
-        val pc = entity.getComponent(PositionComponent::class.java)
-        when(message.direction) {
-            Messages.Direction.NORTH -> pc.y += 1
-            Messages.Direction.SOUTH -> pc.y -= 1
-            Messages.Direction.EAST -> pc.x += 1
-            Messages.Direction.WEST -> pc.x -= 1
-        }
-        val setCamera = Messages.SetCamera(Messages.Position(pc.x, pc.y))
-        player.websocket.writeFinalTextFrame(Messages.encode(setCamera))
-        world.createEntity()
+    private fun handleMovement(player: Player, message: Messages.MoveDirection) {
+        world.edit(player.entityId).add(MovementComponent(message.direction))
     }
 
 
@@ -120,20 +117,26 @@ class GameVerticle : AbstractVerticle() {
         val entity = world.getEntity(player.entityId)
         val pc = entity.getComponent(PositionComponent::class.java)
         val msg = Messages.SetCamera(Messages.Position(pc.x, pc.y))
-        player.websocket.writeFinalTextFrame(Messages.encode(msg))
+        connectionHub.broadcast(createEntity(player.entityId))
+        connectionHub.send(player.entityId, msg)
     }
 
     fun sendEntity(websocket: ServerWebSocket, entityId: Int) {
+        val message = createEntity(entityId)
+        websocket.writeFinalTextFrame(Messages.encode(message))
+    }
+
+    private fun createEntity(entityId: Int): Messages.CreateEntity {
         val entity = world.getEntity(entityId)
         val tc = entity.getComponent(TypeComponent::class.java)
         val pc = entity.getComponent(PositionComponent::class.java)
         val tg = entity.getComponent(TileGraphicComponent::class.java)
         val message = Messages.CreateEntity(entityId,
-                    type = tc.name,
-                    position = Messages.Position(pc.x, pc.y),
-                    graphic = Messages.Graphic(tg.tileId, tg.graphicFile)
-                )
-        websocket.writeFinalTextFrame(Messages.encode(message))
+                type = tc.name,
+                position = Messages.Position(pc.x, pc.y),
+                graphic = Messages.Graphic(tg.tileId, tg.graphicFile)
+        )
+        return message
     }
 
     fun bootstrapMap() {

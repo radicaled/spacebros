@@ -42,6 +42,7 @@ object Messages {
 
     data class SetCamera(val position: Position) : RootMessage
 
-    data class Move(val direction: Direction) : RootMessage
+    data class MoveDirection(val direction: Direction) : RootMessage
+    data class MoveToPosition(val entityId: Int, val position: Position) : RootMessage
 }
 

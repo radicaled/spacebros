@@ -2,6 +2,7 @@ package spacebros.game.screens
 
 import com.artemis.World
 import com.artemis.WorldConfigurationBuilder
+import com.artemis.managers.TagManager
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.Screen
@@ -18,7 +19,9 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
 import io.vertx.core.http.*
 import io.vertx.core.json.JsonObject
+import spacebros.game.EntityHub
 import spacebros.game.components.PositionComponent
+import spacebros.game.components.RemoteEntityComponent
 import spacebros.game.components.RenderableComponent
 import spacebros.game.systems.RenderSystem
 import spacebros.networking.Messages
@@ -34,6 +37,8 @@ class RemotePlayScreen : Screen {
     val assetManager = AssetManager()
 
     val vertx = Vertx.vertx()
+
+    val entityHub = EntityHub()
 
     init {
         val config = WorldConfigurationBuilder()
@@ -77,6 +82,7 @@ class RemotePlayScreen : Screen {
                     when(message) {
                         is Messages.CreateEntity -> createEntity(message)
                         is Messages.SetCamera -> setCamera(message)
+                        is Messages.MoveToPosition -> moveEntity(message)
                         else -> println("Unknown message type: ${it.textData()} (${message.javaClass})")
                     }
                 }
@@ -110,15 +116,26 @@ class RemotePlayScreen : Screen {
             println("Frame location: ${frameX / 32f}, ${frameY / 32f}")
         }
 
-        val rc = RenderableComponent().apply { this.textureRegion = textureRegion }
-        val pc = PositionComponent().apply { this.vector = Vector2(x, y) }
-        world.createEntity().edit()
+        val entityId = world.create()
+
+        val rc  = RenderableComponent().apply { this.textureRegion = textureRegion }
+        val pc  = PositionComponent().apply { this.vector = Vector2(x, y) }
+        val rec = RemoteEntityComponent().apply { this.entityId = message.entityId }
+        world.edit(entityId)
                 .add(rc)
                 .add(pc)
+                .add(rec)
+        entityHub.register(message.entityId, entityId)
     }
 
     private fun setCamera(message: Messages.SetCamera) {
         cam.position.set(message.position.x.toFloat(), message.position.y.toFloat(), 0f)
+    }
+
+    private fun moveEntity(message: Messages.MoveToPosition) {
+        val entityId = entityHub.find(message.entityId)
+        val vector = Vector2(message.position.x.toFloat(), message.position.y.toFloat())
+        world.edit(entityId).add(PositionComponent(vector))
     }
 
     fun handleInput() {
@@ -158,16 +175,16 @@ class RemotePlayScreen : Screen {
 //        cam.position.x = MathUtils.clamp(cam.position.x, effectiveViewportWidth / 2f, 100 - effectiveViewportWidth / 2f);
 //        cam.position.y = MathUtils.clamp(cam.position.y, effectiveViewportHeight / 2f, 100 - effectiveViewportHeight / 2f);
         if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-            queueNetworkMessage(Messages.Move(Messages.Direction.WEST))
+            queueNetworkMessage(Messages.MoveDirection(Messages.Direction.WEST))
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-            queueNetworkMessage(Messages.Move(Messages.Direction.EAST))
+            queueNetworkMessage(Messages.MoveDirection(Messages.Direction.EAST))
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            queueNetworkMessage(Messages.Move(Messages.Direction.SOUTH))
+            queueNetworkMessage(Messages.MoveDirection(Messages.Direction.SOUTH))
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            queueNetworkMessage(Messages.Move(Messages.Direction.NORTH))
+            queueNetworkMessage(Messages.MoveDirection(Messages.Direction.NORTH))
         }
     }
     override fun show() {
