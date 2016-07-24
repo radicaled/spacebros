@@ -1,17 +1,19 @@
 package spacebros.game
 
-class EntityHub {
-    val entities = hashMapOf<Int, Int>()
+import spacebros.game.entities.Entity
 
-    fun register(remoteEntityId: Int, localEntityId: Int) {
-        entities[remoteEntityId] = localEntityId
+class EntityHub {
+    val entities = hashMapOf<Int, Entity>()
+
+    fun register(remoteEntityId: Int, entity: Entity) {
+        entities[remoteEntityId] = entity
     }
 
     fun deregister(remoteEntityId: Int) {
         entities.remove(remoteEntityId)
     }
 
-    fun find(remoteEntityId: Int): Int {
+    fun find(remoteEntityId: Int): Entity {
         return entities.getOrElse(remoteEntityId) {
             throw IllegalArgumentException("entity not found: $remoteEntityId")
         }

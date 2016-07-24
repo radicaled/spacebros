@@ -1,8 +1,5 @@
 package spacebros.game.screens
 
-import com.artemis.World
-import com.artemis.WorldConfigurationBuilder
-import com.artemis.managers.TagManager
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.Screen
@@ -10,32 +7,25 @@ import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Sprite
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
+import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
-import io.vertx.core.http.*
-import io.vertx.core.json.JsonObject
+import io.vertx.core.http.HttpClientOptions
 import spacebros.game.EntityHub
-import spacebros.game.components.PositionComponent
-import spacebros.game.components.RemoteEntityComponent
-import spacebros.game.components.RenderableComponent
-import spacebros.game.systems.RenderSystem
+import spacebros.game.entities.DrawableEntity
 import spacebros.game.ui.MainInterface
 import spacebros.networking.Messages
 
 class RemotePlayScreen : Screen {
     val cam: OrthographicCamera
+    val worldHeight = 100f
+    val worldWidth  = 100f
 
     val rotationSpeed = 0.5f
-
-    val world: World
 
     val assetManager = AssetManager()
 
@@ -44,28 +34,39 @@ class RemotePlayScreen : Screen {
     val entityHub = EntityHub()
 
     val stage: Stage
+    val hud: Stage
+    val gameGroup = Group()
 
-    val screenViewport = ScreenViewport()
+    val fillViewport: FillViewport
+
     val mainInterface: MainInterface
     init {
         // TODO: clean up this entire block, it's a real mess
+        val w = Gdx.graphics.width
+        val h = Gdx.graphics.height
+        // Constructs a new OrthographicCamera, displaying 20 world units at a time.
+        cam = OrthographicCamera(20f, 20f * w/h)
 
-        val config = WorldConfigurationBuilder()
-                .with(RenderSystem())
-                .build()
-        world = World(config)
+        // Position camera in upper left hand corner of worldSprite
+        cam.position.set(cam.viewportWidth / 2f, worldHeight - (cam.viewportHeight / 2f), 0f)
+        cam.update()
 
-        cam = world.getSystem(RenderSystem::class.java).camera
+        fillViewport = FillViewport(worldWidth, worldHeight, cam)
+        stage = Stage(fillViewport)
 
-        stage = Stage(screenViewport)
+        stage.addActor(gameGroup)
+
+        hud = Stage(ScreenViewport())
+
         Gdx.input.inputProcessor = stage
 
-        mainInterface = MainInterface(stage, assetManager)
+        mainInterface = MainInterface(hud, assetManager)
 
         loadRegularAssets()
         mainInterface.setup()
         connectToServerRightNowGoddamnIt()
     }
+
 
     private fun loadRegularAssets() {
         assetManager.load("ui/skins/uiskin.json", Skin::class.java)
@@ -130,22 +131,14 @@ class RemotePlayScreen : Screen {
         val x = message.position.x.toFloat()
         val y = message.position.y.toFloat()
 
-        if (file == "icons/obj/closet.png") {
-//            println("Localized tile ID: ${tileId}")
-//            println("Pixel: ${frameX}, ${frameY}")
-//            println("Frame location: ${frameX / 32f}, ${frameY / 32f}")
+        val entity = DrawableEntity(message.entityId, textureRegion).apply {
+            this.x = x
+            this.y = y
+            this.width = 1f
+            this.height = 1f
         }
-
-        val entityId = world.create()
-
-        val rc  = RenderableComponent().apply { this.textureRegion = textureRegion }
-        val pc  = PositionComponent().apply { this.vector = Vector2(x, y) }
-        val rec = RemoteEntityComponent().apply { this.entityId = message.entityId }
-        world.edit(entityId)
-                .add(rc)
-                .add(pc)
-                .add(rec)
-        entityHub.register(message.entityId, entityId)
+        gameGroup.addActor(entity)
+        entityHub.register(message.entityId, entity)
     }
 
     private fun setCamera(message: Messages.SetCamera) {
@@ -153,12 +146,12 @@ class RemotePlayScreen : Screen {
     }
 
     private fun moveEntity(message: Messages.MoveToPosition) {
-        val entityId = entityHub.find(message.entityId)
-        val vector = Vector2(message.position.x.toFloat(), message.position.y.toFloat())
-        world.edit(entityId).add(PositionComponent(vector))
+        val entity = entityHub.find(message.entityId)
+        entity.x = message.position.x.toFloat()
+        entity.y = message.position.y.toFloat()
     }
 
-    fun handleInput() {
+    fun handleInput(cam: OrthographicCamera) {
 //        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
 //            cam.zoom += 0.02f;
 //        }
@@ -186,7 +179,7 @@ class RemotePlayScreen : Screen {
 //        if (Gdx.input.isKeyPressed(Input.Keys.NUMPAD_0)) {
 //            println("Camera position: ${cam.position}")
 //        }
-        // TODO: 100 == renderSystem.worldWidth
+//        // TODO: 100 == renderSystem.worldWidth
 //        cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);
 //
 //        val effectiveViewportWidth = cam.viewportWidth * cam.zoom;
@@ -218,9 +211,10 @@ class RemotePlayScreen : Screen {
     override fun resize(width: Int, height: Int) {
         cam.viewportWidth = 20f
         cam.viewportHeight = 20f * height/width
+
         cam.update()
 
-        screenViewport.update(width, height, true)
+//        fillViewport.update(width, height, true)
     }
 
     override fun hide() {
@@ -228,15 +222,21 @@ class RemotePlayScreen : Screen {
     }
 
     override fun render(delta: Float) {
-        handleInput()
+//        handleInput(stage.camera as OrthographicCamera)
+        handleInput(cam)
+//        cam.position.set(cam.position.x + 1, cam.position.y, cam.position.z)
 
-        world.delta = delta
-        world.process()
+        Gdx.gl.glClearColor(1f, 0f, 0f, 1f)
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+
+        mainInterface.update()
 
         stage.act(delta)
-        stage.draw()
+        hud.act(delta)
 
-        cam.update()
+        stage.draw()
+        hud.draw()
+
     }
 
     override fun resume() {
@@ -245,5 +245,6 @@ class RemotePlayScreen : Screen {
 
     override fun dispose() {
         stage.dispose()
+        hud.dispose()
     }
 }
