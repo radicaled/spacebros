@@ -1,19 +1,26 @@
 package spacebros.game.ui
 
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.assets.AssetManager
-import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
+import com.badlogic.gdx.scenes.scene2d.ui.TextArea
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import rx.lang.kotlin.PublishSubject
 
 class MainInterface(val stage: Stage, val assetManager: AssetManager) {
     lateinit var cameraPosition: Label
     lateinit var screenInfo: Label
+
+    val textFieldSubmissions = PublishSubject<String>()
+    // TODO: MASSIVE, MASSIVE CLEAN-up
     fun setup() {
         val skin = assetManager.get("ui/skins/uiskin.json", Skin::class.java)
         val mainTable = Table().apply {
             top()
             setFillParent(true)
             debug = true
+            zIndex = 10
         }
 
         val table = Table().apply {
@@ -24,9 +31,28 @@ class MainInterface(val stage: Stage, val assetManager: AssetManager) {
         cameraPosition = Label("...", skin)
         screenInfo = Label("...", skin)
 
-        val textField = TextField("Hello, World", skin)
+
+
+        val textField = TextField("", skin)
+        textField.addListener(object : InputListener() {
+            override fun keyTyped(event: InputEvent, character: Char): Boolean {
+                return when(event.keyCode) {
+                    Input.Keys.ESCAPE -> {
+                        stage.keyboardFocus = null
+                        true
+                    }
+                    Input.Keys.ENTER -> {
+                        textFieldSubmissions.onNext(textField.text)
+                        textField.text = ""
+                        true
+
+                    }
+                    else -> false
+                }
+            }
+        })
+
         val textArea  = TextArea("Player 1 has arrived", skin)
-//        table.add(textField)
         table.add(cameraPosition)
         table.row()
         table.add(screenInfo)

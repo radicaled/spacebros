@@ -2,6 +2,7 @@ package spacebros.game.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.GL20
@@ -9,13 +10,16 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClientOptions
+import rx.subscriptions.CompositeSubscription
 import spacebros.game.EntityHub
 import spacebros.game.entities.DrawableEntity
 import spacebros.game.ui.MainInterface
@@ -41,6 +45,7 @@ class RemotePlayScreen : Screen {
     val fillViewport: FillViewport
 
     val mainInterface: MainInterface
+    val subscriptions = CompositeSubscription()
     init {
         // TODO: clean up this entire block, it's a real mess
         val w = Gdx.graphics.width
@@ -58,13 +63,20 @@ class RemotePlayScreen : Screen {
 
         hud = Stage(ScreenViewport())
 
-        Gdx.input.inputProcessor = stage
+        Gdx.input.inputProcessor = InputMultiplexer(stage, hud)
 
         mainInterface = MainInterface(hud, assetManager)
 
         loadRegularAssets()
         mainInterface.setup()
         connectToServerRightNowGoddamnIt()
+        listenForEvents()
+    }
+
+    private fun listenForEvents() {
+        mainInterface.textFieldSubmissions.subscribe {
+            queueNetworkMessage(Messages.TextMessage(it))
+        }.apply { subscriptions.add(this) }
     }
 
 
@@ -213,7 +225,6 @@ class RemotePlayScreen : Screen {
         cam.viewportHeight = 20f * height/width
 
         cam.update()
-
 //        fillViewport.update(width, height, true)
     }
 
@@ -246,5 +257,6 @@ class RemotePlayScreen : Screen {
     override fun dispose() {
         stage.dispose()
         hud.dispose()
+        subscriptions.unsubscribe()
     }
 }

@@ -63,6 +63,9 @@ project(":core") {
         compile "io.vertx:vertx-core:$vertx_version"
         compile "io.vertx:vertx-web:$vertx_version"
 
+        compile 'io.reactivex:rxjava:1.1.8'
+        compile 'io.reactivex:rxkotlin:0.60.0'
+
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
         compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
     }
@@ -79,6 +82,9 @@ project(":server") {
 
         compile "com.fasterxml.jackson.core:jackson-databind:2.8.0"
         compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.0"
+
+        compile 'io.reactivex:rxjava:1.1.8'
+        compile 'io.reactivex:rxkotlin:0.60.0'
 
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
         compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
