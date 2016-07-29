@@ -3,36 +3,44 @@ package spacebros.game.ui
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogic.gdx.scenes.scene2d.ui.Table
+import com.badlogic.gdx.scenes.scene2d.ui.*
 
 class MainInterface(val stage: Stage, val assetManager: AssetManager) {
     lateinit var cameraPosition: Label
     lateinit var screenInfo: Label
     fun setup() {
-        val uiGroup = Group()
         val skin = assetManager.get("ui/skins/uiskin.json", Skin::class.java)
-        val table = Table()
-        table.setFillParent(true)
-        table.debug = true
-        table.right().top()
+        val mainTable = Table().apply {
+            top()
+            setFillParent(true)
+            debug = true
+        }
 
-
-        table.zIndex = 10
-
+        val table = Table().apply {
+            top().right()
+            debug = true
+//            zIndex = 10
+        }
         cameraPosition = Label("...", skin)
         screenInfo = Label("...", skin)
 
-//        val textField = TextField("Hello, World", skin)
+        val textField = TextField("Hello, World", skin)
+        val textArea  = TextArea("Player 1 has arrived", skin)
 //        table.add(textField)
         table.add(cameraPosition)
         table.row()
         table.add(screenInfo)
 
-//        uiGroup.addActor(table)
-//        stage.addActor(uiGroup)
-        stage.addActor(table)
+        mainTable.add(table)
+                .expandX()
+                .top().right()
+        mainTable.row()
+        mainTable.add(Table().apply {
+            add(textArea)
+            row()
+            add(textField)
+        }).expandY().bottom().left()
+        stage.addActor(mainTable)
     }
 
     fun update() {

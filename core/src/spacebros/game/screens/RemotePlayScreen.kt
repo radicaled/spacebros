@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.utils.viewport.FillViewport
+import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClientOptions
@@ -53,7 +54,6 @@ class RemotePlayScreen : Screen {
 
         fillViewport = FillViewport(worldWidth, worldHeight, cam)
         stage = Stage(fillViewport)
-
         stage.addActor(gameGroup)
 
         hud = Stage(ScreenViewport())
