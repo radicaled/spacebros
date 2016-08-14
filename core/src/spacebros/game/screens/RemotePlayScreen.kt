@@ -114,12 +114,13 @@ class RemotePlayScreen : Screen {
                     val message = Messages.decode(it.textData())
                     when(message) {
                         is Messages.CreateEntity -> createEntity(message)
+                        is Messages.DeleteEntity -> deleteEntity(message)
                         is Messages.SetCamera -> setCamera(message)
                         is Messages.MoveToPosition -> moveEntity(message)
+                        is Messages.TextMessage -> displayText(message)
                         else -> println("Unknown message type: ${it.textData()} (${message.javaClass})")
                     }
                 }
-
             }
         }
     }
@@ -156,13 +157,19 @@ class RemotePlayScreen : Screen {
     private fun setCamera(message: Messages.SetCamera) {
         cam.position.set(message.position.x.toFloat(), message.position.y.toFloat(), 0f)
     }
-
+    private fun deleteEntity(message: Messages.DeleteEntity) {
+        val entity = entityHub.find(message.entityId)
+        entity.remove()
+        entityHub.deregister(message.entityId)
+    }
     private fun moveEntity(message: Messages.MoveToPosition) {
         val entity = entityHub.find(message.entityId)
         entity.x = message.position.x.toFloat()
         entity.y = message.position.y.toFloat()
     }
-
+    private fun displayText(message: Messages.TextMessage) {
+        mainInterface.addToMessageLog(message.message)
+    }
     fun handleInput(cam: OrthographicCamera) {
 //        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
 //            cam.zoom += 0.02f;

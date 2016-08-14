@@ -12,6 +12,8 @@ class MainInterface(val stage: Stage, val assetManager: AssetManager) {
     lateinit var cameraPosition: Label
     lateinit var screenInfo: Label
 
+    lateinit var textArea: TextArea
+
     val textFieldSubmissions = PublishSubject<String>()
     // TODO: MASSIVE, MASSIVE CLEAN-up
     fun setup() {
@@ -52,7 +54,10 @@ class MainInterface(val stage: Stage, val assetManager: AssetManager) {
             }
         })
 
-        val textArea  = TextArea("Player 1 has arrived", skin)
+        textArea  = TextArea("Player 1 has arrived", skin).apply {
+            width = 50f
+            height = 50f
+        }
         table.add(cameraPosition)
         table.row()
         table.add(screenInfo)
@@ -67,6 +72,10 @@ class MainInterface(val stage: Stage, val assetManager: AssetManager) {
             add(textField)
         }).expandY().bottom().left()
         stage.addActor(mainTable)
+    }
+
+    fun addToMessageLog(text: String) {
+        textArea.appendText(text)
     }
 
     fun update() {

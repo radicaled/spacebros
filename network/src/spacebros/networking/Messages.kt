@@ -39,6 +39,7 @@ object Messages {
     data class CreateEntity(val entityId: Int, val type: String,
                             val position: Position,
                             val graphic: Graphic) : RootMessage
+    data class DeleteEntity(val entityId: Int) : RootMessage
 
     data class SetCamera(val position: Position) : RootMessage
 

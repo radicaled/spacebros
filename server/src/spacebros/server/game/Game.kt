@@ -66,9 +66,13 @@ class GameVerticle : AbstractVerticle() {
         synchronizePlayer(player)
         websocket.frameHandler { handleMessage(player, it.textData()) }
         websocket.closeHandler {
+            world.delete(player.entityId)
             players.remove(player)
             connectionHub.unregister(player.entityId)
+            connectionHub.broadcast(Messages.DeleteEntity(player.entityId))
+
         }
+        connectionHub.broadcast(Messages.TextMessage("A new player has joined!"))
     }
 
     fun createNewPlayer(websocket: ServerWebSocket): Player {
