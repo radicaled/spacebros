@@ -122,6 +122,7 @@ class RemotePlayScreen : Screen {
                     }
                 }
             }
+            queueNetworkMessage(Messages.Login(""))
         }
     }
 
