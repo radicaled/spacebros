@@ -5,10 +5,10 @@ import spacebros.networking.Messages
 
 // TODO: parallization, buffer / queueing / drain on demand
 class ConnectionHub {
-    private val connections = hashMapOf<Int, ServerWebSocket>()
+    private val connections = hashMapOf<Int, GameConnection>()
 
-    fun register(entityId: Int, websocket: ServerWebSocket) {
-        connections[entityId] = websocket
+    fun register(entityId: Int, gameConnection: GameConnection) {
+        connections[entityId] = gameConnection
     }
 
     fun unregister(entityId: Int) {
@@ -18,10 +18,10 @@ class ConnectionHub {
     fun send(entityId: Int, message: Messages.RootMessage, silent: Boolean = true) {
         val connection = connections[entityId]
         if (connection == null && !silent) throw IllegalArgumentException("entityId ($entityId) not found")
-        connection?.writeFinalTextFrame(Messages.encode(message))
+        connection?.sendData(Messages.encode(message))
     }
 
     fun broadcast(message: Messages.RootMessage) {
-        connections.values.forEach { it.writeFinalTextFrame(Messages.encode(message)) }
+        connections.values.forEach { it.sendData(Messages.encode(message)) }
     }
 }
