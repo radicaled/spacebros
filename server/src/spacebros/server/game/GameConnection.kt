@@ -57,7 +57,6 @@ class NetGameConnection(val socket: NetSocket) : GameConnection() {
         buffer.appendBytes(bytes)
         while (true) {
             val msg = readBufferedMessage()
-            println("Iterated over msg: $msg vs its length: ${buffer.length()}")
             if (msg != null)
                 dataReceivedHandler?.invoke(msg)
             else
