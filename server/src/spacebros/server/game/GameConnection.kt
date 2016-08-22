@@ -50,7 +50,7 @@ class NetGameConnection(val socket: NetSocket) : GameConnection() {
         buffer.appendString("MSG", "ascii")
         buffer.appendUnsignedInt(messageBuffer.length().toLong())
         buffer.appendBuffer(messageBuffer)
-        socket.write(data)
+        socket.write(buffer)
     }
 
     fun acceptData(bytes: ByteArray) {
