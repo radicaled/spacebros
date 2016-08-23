@@ -18,9 +18,9 @@ object Messages {
     fun encode(message: RootMessage): String = mapper.writeValueAsString(message)
     fun decode(message: String): Any = mapper.readValue(message, RootMessage::class.java)
 
-    data class Position(val x: Int, val y: Int) {
+    data class Position(val x: Int, val y: Int, val z: Int) {
         companion object {
-            val ZERO = Position(0, 0)
+            val ZERO = Position(0, 0, 0)
         }
     }
 

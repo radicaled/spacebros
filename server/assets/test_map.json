@@ -1,0 +1,12 @@
+{
+  "entities": [
+    {
+      "type": "wall",
+      "graphic": 4,
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  ]
+}

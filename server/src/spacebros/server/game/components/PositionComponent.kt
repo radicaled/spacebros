@@ -5,4 +5,5 @@ import com.artemis.Component
 class PositionComponent : Component() {
     var x = 0
     var y = 0
+    var z = 0
 }

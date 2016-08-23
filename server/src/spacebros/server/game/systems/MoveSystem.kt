@@ -30,8 +30,8 @@ class MoveSystem(val connectionHub: ConnectionHub): IteratingSystem(aspects) {
 
         moveMapper.remove(entityId)
 
-        val setCamera = Messages.SetCamera(Messages.Position(pc.x, pc.y))
-        val moveTo = Messages.MoveToPosition(entityId, Messages.Position(pc.x, pc.y))
+        val setCamera = Messages.SetCamera(Messages.Position(pc.x, pc.y, pc.z))
+        val moveTo = Messages.MoveToPosition(entityId, Messages.Position(pc.x, pc.y, pc.z))
         connectionHub.send(entityId, setCamera)
         connectionHub.broadcast(moveTo)
     }

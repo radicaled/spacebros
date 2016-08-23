@@ -2,6 +2,9 @@ package spacebros.server.game
 
 import com.artemis.*
 import com.artemis.managers.TagManager
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.JsonObject
@@ -16,6 +19,8 @@ import spacebros.server.game.components.map.TileLayer
 import spacebros.server.game.components.map.TiledMap
 import spacebros.server.game.systems.MoveSystem
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -43,7 +48,9 @@ class GameVerticle : AbstractVerticle() {
     }
 
     override fun start() {
-        bootstrapMap()
+//        bootstrapMap()
+        bootstrapCustomMap()
+//        saveMap()
         lastTickAt = LocalDateTime.now()
         vertx.setPeriodic(1) {
             val delta = Duration.between(lastTickAt, LocalDateTime.now()).toMillis()
@@ -76,7 +83,7 @@ class GameVerticle : AbstractVerticle() {
         val entityId = world.create(playerArchetype)
         world.getEntity(entityId).apply {
             getComponent(TypeComponent::class.java).apply { name = "player" }
-            getComponent(PositionComponent::class.java).apply { x = 5; y = 91 }
+            getComponent(PositionComponent::class.java).apply { x = 5; y = 8; z = 6 }
             getComponent(TileGraphicComponent::class.java).apply { graphicFile = "icons/mob/human.png"; tileId = 193 }
         }
 
@@ -113,7 +120,7 @@ class GameVerticle : AbstractVerticle() {
         // Set the camera to their player's position?
         val entity = world.getEntity(player.entityId)
         val pc = entity.getComponent(PositionComponent::class.java)
-        val msg = Messages.SetCamera(Messages.Position(pc.x, pc.y))
+        val msg = Messages.SetCamera(Messages.Position(pc.x, pc.y, pc.z))
         connectionHub.broadcast(createEntity(player.entityId))
         connectionHub.send(player.entityId, msg)
     }
@@ -130,10 +137,69 @@ class GameVerticle : AbstractVerticle() {
         val tg = entity.getComponent(TileGraphicComponent::class.java)
         val message = Messages.CreateEntity(entityId,
                 type = tc.name,
-                position = Messages.Position(pc.x, pc.y),
+                position = Messages.Position(pc.x, pc.y, pc.z),
                 graphic = Messages.Graphic(tg.tileId, tg.graphicFile)
         )
         return message
+    }
+
+    fun saveMap() {
+        world.process()
+        val mapper = jacksonObjectMapper()
+                .enableDefaultTyping()
+                .registerKotlinModule().apply {
+            enable(SerializationFeature.INDENT_OUTPUT)
+        }
+        val map = Map()
+        val entities = world.aspectSubscriptionManager.get(Aspect.all()).entities
+        val filenames = hashSetOf<String>()
+        entities.data.forEach { entityId ->
+            val entity = world.getEntity(entityId)
+            val tc = entity.getComponent(TypeComponent::class.java)
+            val pc = entity.getComponent(PositionComponent::class.java)
+            val tg = entity.getComponent(TileGraphicComponent::class.java)
+
+            val fileName = Paths.get(tg.graphicFile).fileName.toString()
+            filenames.add(fileName)
+            map.entities.add(MapEntity().apply {
+                type = fileName.substring(0, fileName.lastIndexOf("."))
+                position = MapPosition().apply {
+                    x = pc.x
+                    y = pc.y
+                    z = pc.z
+                }
+                graphic = tg.tileId
+            })
+        }
+        val path = Paths.get("/home/arron/Projects/spacebros/server/assets/saved_map.json")
+        val writer = Files.newBufferedWriter(path)
+//        val fileContents = mapper.writeValueAsString(map)
+        mapper.writeValue(writer, map)
+    }
+
+    fun bootstrapCustomMap() {
+        val mapLocation = "/home/arron/Projects/spacebros/server/assets/map.json"
+        val mapper = jacksonObjectMapper()
+                .enableDefaultTyping()
+                .registerKotlinModule().apply {
+            enable(SerializationFeature.INDENT_OUTPUT)
+        }
+        val fileData = File(mapLocation).readText()
+        val map = mapper.readValue(fileData, Map::class.java)
+        // TODO: clean up once formalized
+        map.entities.forEach { mapEntity ->
+            world.createEntity().edit()
+                    .add(TypeComponent().apply { name = mapEntity.type!! })
+                    .add(PositionComponent().apply {
+                        this.x = mapEntity.position?.x!!
+                        this.y = mapEntity.position?.y!!
+                    })
+                    .add(TileGraphicComponent().apply {
+                        this.tileId = mapEntity.graphic!!
+                        this.graphicFile = mapEntity.type!!
+                    })
+        }
+
     }
 
     fun bootstrapMap() {
@@ -142,14 +208,14 @@ class GameVerticle : AbstractVerticle() {
         val json = JsonObject(fileData)
         val tiledMap = TiledMap.parse(json)
 
-        tiledMap.layers.forEach { layer ->
+        tiledMap.layers.forEachIndexed { index, layer ->
             when(layer) {
                 is TileLayer ->
                     (0..layer.height - 1).forEach { y ->
                         (0..layer.width - 1).forEach { x ->
                             val tileId = layer.getCell(x, y)
                             if (tileId != null && tileId > 0) {
-                                val flipY = true
+                                val flipY = false
                                 val tile = tiledMap.getTile(tileId)
                                 if (tile !is EmptyTile) {
                                     val localTileId = tile.localTileId
@@ -160,7 +226,11 @@ class GameVerticle : AbstractVerticle() {
                                     } else { y }
                                     world.createEntity().edit()
                                         .add(TypeComponent())
-                                        .add(PositionComponent().apply { this.x = x; this.y = actualValueOfYBecauseStupidProgrammingThings })
+                                        .add(PositionComponent().apply {
+                                            this.x = x
+                                            this.y = actualValueOfYBecauseStupidProgrammingThings
+                                            this.z = index
+                                        })
                                         .add(TileGraphicComponent().apply { this.tileId = localTileId; this.graphicFile = tile.tileset.image })
                                 }
                             }
