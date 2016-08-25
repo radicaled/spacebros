@@ -37,6 +37,10 @@ object Messages {
     interface RootMessage
 
     data class Login(val playerName: String, val data: String) : RootMessage
+    data class LoginFail(val reason: String) : RootMessage
+    data class LoginSuccess(val welcomeMessage: String) : RootMessage
+
+    class SynchronizeRequest : RootMessage
 
     data class CreateEntity(val entityId: Int, val type: String,
                             val position: Position,

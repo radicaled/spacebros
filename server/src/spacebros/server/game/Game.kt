@@ -92,6 +92,7 @@ class GameVerticle : AbstractVerticle() {
         val message = Messages.decode(data)
         when(message) {
             is Messages.Login -> handleLogin(player, message)
+            is Messages.SynchronizeRequest -> handleSynchronize(player, message)
             is Messages.MoveDirection -> handleMovement(player, message)
             is Messages.TextMessage -> handleTextMessage(player, message)
         }
@@ -109,11 +110,16 @@ class GameVerticle : AbstractVerticle() {
         world.edit(player.entityId).add(MovementComponent(message.direction))
     }
 
+    private fun handleSynchronize(player: Player, message: Messages.SynchronizeRequest) {
+        synchronizePlayer(player)
+    }
+
     private fun handleLogin(player: Player, message: Messages.Login) {
+        // TODO: authentication
         world.getEntity(player.entityId).apply {
             getComponent(NameComponent::class.java).apply { name = message.playerName }
         }
-        synchronizePlayer(player)
+        connectionHub.send(player.entityId, Messages.LoginSuccess("Welcome back, ${message.playerName}"))
         connectionHub.broadcast(Messages.TextMessage("${message.playerName} has joined!"))
     }
 
