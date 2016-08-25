@@ -21,15 +21,12 @@ class MoveSystem(val connectionHub: ConnectionHub): IteratingSystem(aspects) {
         val pc = posMapper.get(entityId)
         val mc = moveMapper.get(entityId)
 
-        print("Moving FROM ${pc.x}/${pc.y}")
-
         when(mc.direction) {
             Messages.Direction.NORTH -> pc.y -= 1
             Messages.Direction.SOUTH -> pc.y += 1
             Messages.Direction.EAST -> pc.x += 1
             Messages.Direction.WEST -> pc.x -= 1
         }
-        print("Moving TO ${pc.x}/${pc.y}")
 
         moveMapper.remove(entityId)
 
