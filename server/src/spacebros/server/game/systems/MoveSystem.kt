@@ -22,8 +22,8 @@ class MoveSystem(val connectionHub: ConnectionHub): IteratingSystem(aspects) {
         val mc = moveMapper.get(entityId)
 
         when(mc.direction) {
-            Messages.Direction.NORTH -> pc.y += 1
-            Messages.Direction.SOUTH -> pc.y -= 1
+            Messages.Direction.NORTH -> pc.y -= 1
+            Messages.Direction.SOUTH -> pc.y += 1
             Messages.Direction.EAST -> pc.x += 1
             Messages.Direction.WEST -> pc.x -= 1
         }
