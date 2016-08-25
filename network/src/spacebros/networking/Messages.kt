@@ -36,7 +36,7 @@ object Messages {
     @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
     interface RootMessage
 
-    data class Login(val data: String) : RootMessage
+    data class Login(val playerName: String, val data: String) : RootMessage
 
     data class CreateEntity(val entityId: Int, val type: String,
                             val position: Position,

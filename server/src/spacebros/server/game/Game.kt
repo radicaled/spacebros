@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.JsonObject
-import io.vertx.core.net.NetSocket
 import spacebros.networking.Messages
 import spacebros.server.game.components.*
 import spacebros.server.game.components.map.EmptyTile
@@ -100,8 +99,10 @@ class GameVerticle : AbstractVerticle() {
     }
 
     private fun handleTextMessage(player: Player, message: Messages.TextMessage) {
-        // TODO: something smarter than a simple echo
-        connectionHub.broadcast(message)
+        val entity = world.getEntity(player.entityId)
+        val name = entity.getComponent(NameComponent::class.java).name
+        val text = "$name: ${message.message}"
+        connectionHub.broadcast(Messages.TextMessage(text))
     }
 
     private fun handleMovement(player: Player, message: Messages.MoveDirection) {
@@ -109,8 +110,11 @@ class GameVerticle : AbstractVerticle() {
     }
 
     private fun handleLogin(player: Player, message: Messages.Login) {
+        world.getEntity(player.entityId).apply {
+            getComponent(NameComponent::class.java).apply { name = message.playerName }
+        }
         synchronizePlayer(player)
-        connectionHub.broadcast(Messages.TextMessage("A new player has joined!"))
+        connectionHub.broadcast(Messages.TextMessage("${message.playerName} has joined!"))
     }
 
 
