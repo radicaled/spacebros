@@ -10,13 +10,13 @@ import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.NetSocket
 import spacebros.networking.Messages
-import spacebros.server.game.components.MovementComponent
-import spacebros.server.game.components.PositionComponent
-import spacebros.server.game.components.TileGraphicComponent
-import spacebros.server.game.components.TypeComponent
+import spacebros.server.game.components.*
 import spacebros.server.game.components.map.EmptyTile
 import spacebros.server.game.components.map.TileLayer
 import spacebros.server.game.components.map.TiledMap
+import spacebros.server.game.entities.ArchetypeRegistry
+import spacebros.server.game.entities.makeRegistry
+import spacebros.server.game.systems.CollisionSystem
 import spacebros.server.game.systems.MoveSystem
 import java.io.File
 import java.nio.file.Files
@@ -30,21 +30,18 @@ class GameVerticle : AbstractVerticle() {
     val world: World
     var lastTickAt = LocalDateTime.MIN
 
-    val playerArchetype: Archetype
+    val archetypeRegistry: ArchetypeRegistry
 
     val connectionHub = ConnectionHub()
 
     init {
         val config = WorldConfigurationBuilder()
                 .with(TagManager())
+                .with(CollisionSystem())
                 .with(MoveSystem(connectionHub))
                 .build()
         world = World(config)
-        playerArchetype = ArchetypeBuilder()
-                .add(TypeComponent::class.java)
-                .add(PositionComponent::class.java)
-                .add(TileGraphicComponent::class.java)
-                .build(world)
+        archetypeRegistry = makeRegistry(world)
     }
 
     override fun start() {
@@ -80,10 +77,10 @@ class GameVerticle : AbstractVerticle() {
     }
 
     fun createNewPlayer(gameConnection: GameConnection): Player {
-        val entityId = world.create(playerArchetype)
+        val entityId = world.create(archetypeRegistry.get("player"))
         world.getEntity(entityId).apply {
             getComponent(TypeComponent::class.java).apply { name = "player" }
-            getComponent(PositionComponent::class.java).apply { x = 5; y = 8; z = 6 }
+            getComponent(PositionComponent::class.java).apply { x = 5; y = 8; z = 1 }
             getComponent(TileGraphicComponent::class.java).apply { graphicFile = "icons/mob/human.png"; tileId = 193 }
         }
 
@@ -97,8 +94,14 @@ class GameVerticle : AbstractVerticle() {
         when(message) {
             is Messages.Login -> handleLogin(player, message)
             is Messages.MoveDirection -> handleMovement(player, message)
+            is Messages.TextMessage -> handleTextMessage(player, message)
         }
 
+    }
+
+    private fun handleTextMessage(player: Player, message: Messages.TextMessage) {
+        // TODO: something smarter than a simple echo
+        connectionHub.broadcast(message)
     }
 
     private fun handleMovement(player: Player, message: Messages.MoveDirection) {
@@ -188,16 +191,27 @@ class GameVerticle : AbstractVerticle() {
         val map = mapper.readValue(fileData, Map::class.java)
         // TODO: clean up once formalized
         map.entities.forEach { mapEntity ->
-            world.createEntity().edit()
-                    .add(TypeComponent().apply { name = mapEntity.type!! })
-                    .add(PositionComponent().apply {
-                        this.x = mapEntity.position?.x!!
-                        this.y = mapEntity.position?.y!!
-                    })
-                    .add(TileGraphicComponent().apply {
-                        this.tileId = mapEntity.graphic!!
-                        this.graphicFile = mapEntity.type!!
-                    })
+            val archetype = if (archetypeRegistry.has(mapEntity.type!!)) {
+                archetypeRegistry.get(mapEntity.type!!)
+            } else {
+                archetypeRegistry.get("visual")
+            }
+
+            // TODO: must be some way to clean this up
+            val entity = world.createEntity(archetype)
+            val tc = entity.getComponent(TypeComponent::class.java)
+            val pc = entity.getComponent(PositionComponent::class.java)
+            val tg = entity.getComponent(TileGraphicComponent::class.java)
+
+            tc.name = mapEntity.type!!
+            pc.apply {
+                this.x = mapEntity.position?.x!!
+                this.y = mapEntity.position?.y!!
+            }
+            tg.apply {
+                this.tileId = mapEntity.graphic!!
+                this.graphicFile = mapEntity.type!!
+            }
         }
 
     }
