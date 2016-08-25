@@ -3,6 +3,7 @@ package spacebros.server.game
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.net.NetSocket
+import java.io.IOException
 
 abstract class GameConnection {
     protected var dataReceivedHandler: ((String) -> Unit)? = null
@@ -42,6 +43,11 @@ class NetGameConnection(val socket: NetSocket) : GameConnection() {
             acceptData(it.bytes)
         }
         socket.closeHandler { closedHandler?.invoke() }
+        socket.exceptionHandler {
+            if (!(it is IOException && it.message == "Connection reset by peer")) {
+                throw it
+            }
+        }
     }
 
     override fun sendData(data: String) {
