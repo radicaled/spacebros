@@ -100,10 +100,20 @@ class GameVerticle : AbstractVerticle() {
     }
 
     private fun handleTextMessage(player: Player, message: Messages.TextMessage) {
-        val entity = world.getEntity(player.entityId)
-        val name = entity.getComponent(NameComponent::class.java).name
-        val text = "$name: ${message.message}"
-        connectionHub.broadcast(Messages.TextMessage(text))
+        when(message.textType) {
+            Messages.TextType.SPEAK -> {
+                val entity = world.getEntity(player.entityId)
+                val name = entity.getComponent(NameComponent::class.java).name
+                val text = "$name: ${message.message}"
+                val textMessage = Messages.TextMessage(text, Messages.TextType.SPEAK).apply {
+                    entityId = player.entityId
+                }
+                connectionHub.broadcast(textMessage)
+            }
+            else -> {
+                println("Player $player send an unsupported message.")
+            }
+        }
     }
 
     private fun handleMovement(player: Player, message: Messages.MoveDirection) {
@@ -120,7 +130,7 @@ class GameVerticle : AbstractVerticle() {
             getComponent(NameComponent::class.java).apply { name = message.playerName }
         }
         connectionHub.send(player.entityId, Messages.LoginSuccess("Welcome back, ${message.playerName}"))
-        connectionHub.broadcast(Messages.TextMessage("${message.playerName} has joined!"))
+        connectionHub.broadcast(Messages.TextMessage("${message.playerName} has joined!", Messages.TextType.MESSAGE))
     }
 
 

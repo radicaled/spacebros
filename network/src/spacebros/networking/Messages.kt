@@ -33,6 +33,11 @@ object Messages {
         WEST
     }
 
+    enum class TextType {
+        MESSAGE,
+        SPEAK
+    }
+
     @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
     interface RootMessage
 
@@ -52,6 +57,8 @@ object Messages {
     data class MoveDirection(val direction: Direction) : RootMessage
     data class MoveToPosition(val entityId: Int, val position: Position) : RootMessage
 
-    data class TextMessage(val message: String) : RootMessage
+    data class TextMessage(val message: String, val textType: TextType) : RootMessage {
+        var entityId: Int? = null
+    }
 }
 
