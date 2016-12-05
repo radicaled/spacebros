@@ -225,8 +225,10 @@ class GameVerticle : AbstractVerticle() {
             val tc = entity.getComponent(TypeComponent::class.java)
             val pc = entity.getComponent(PositionComponent::class.java)
             val tg = entity.getComponent(TileGraphicComponent::class.java)
+            val nc = entity.getComponent(NameComponent::class.java)
 
             tc.name = mapEntity.type!!
+            nc.name = mapEntity.type!!
             pc.apply {
                 this.x = mapEntity.position?.x!!
                 this.y = mapEntity.position?.y!!

@@ -8,6 +8,7 @@ object Archetypes {
             .add(TypeComponent::class.java)
             .add(PositionComponent::class.java)
             .add(TileGraphicComponent::class.java)
+            .add(NameComponent::class.java)
 
     val player = ArchetypeBuilder()
             .add(TypeComponent::class.java)
@@ -21,4 +22,5 @@ object Archetypes {
             .add(PositionComponent::class.java)
             .add(TileGraphicComponent::class.java)
             .add(CollisionComponent::class.java)
+            .add(NameComponent::class.java)
 }
