@@ -48,6 +48,7 @@ object Messages {
     class SynchronizeRequest : RootMessage
 
     data class CreateEntity(val entityId: Int, val type: String,
+                            val name: String?,
                             val position: Position,
                             val graphic: Graphic) : RootMessage
     data class DeleteEntity(val entityId: Int) : RootMessage

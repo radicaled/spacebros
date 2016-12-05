@@ -158,8 +158,11 @@ class GameVerticle : AbstractVerticle() {
         val tc = entity.getComponent(TypeComponent::class.java)
         val pc = entity.getComponent(PositionComponent::class.java)
         val tg = entity.getComponent(TileGraphicComponent::class.java)
+        val nc = entity.getComponent(NameComponent::class.java)
+
         val message = Messages.CreateEntity(entityId,
                 type = tc.name,
+                name = nc?.name,
                 position = Messages.Position(pc.x, pc.y, pc.z),
                 graphic = Messages.Graphic(tg.tileId, tg.graphicFile)
         )
