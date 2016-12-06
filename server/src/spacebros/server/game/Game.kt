@@ -8,6 +8,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.JsonObject
+import io.vertx.core.logging.Logger
+import io.vertx.core.logging.LoggerFactory
 import spacebros.networking.Messages
 import spacebros.server.game.components.*
 import spacebros.server.game.components.map.EmptyTile
@@ -24,6 +26,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 class GameVerticle : AbstractVerticle() {
+    val logger: Logger = LoggerFactory.getLogger(this.javaClass)
     val connections = arrayListOf<ServerWebSocket>()
     val players     = arrayListOf<Player>()
     val world: World
@@ -53,6 +56,7 @@ class GameVerticle : AbstractVerticle() {
             tick(delta.toFloat())
             lastTickAt = LocalDateTime.now()
         }
+        logger.info("Server ready.")
     }
 
     fun tick(delta: Float) {
