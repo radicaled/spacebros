@@ -4,19 +4,21 @@
 - Remove the libgdx client -- it's out of date and not working
 - Archetypes should use an s-tree (or any s-exp) for definition -- or Groovy?
 - Behavior system to script entities like doors.
-  - Legit don't remember how I was going to compose this system.
-  - BehaviorSystem.execute(BehaviorComponent) ->
-    BehaviorComponent(val behaviors: listOf(BehaviorComponent)) ??
-  - Behaviors have state? Or should pass all parameters as function calls?
-    - Behaviors should store data across Components
-    - Therefore, no internal state
-    - Therefore, a single Behavior instance per behavior
-    - BehaviorRegistry analogus to ArchetypeRegistery?
-    - map.json: how do objects specify their behaviors...?
+  - Legit don't remember how I was going to compose this system. (X)
+  - BehaviorSystem.execute(BehaviorComponent) -> (X)
+    BehaviorComponent(val behaviors: listOf(BehaviorComponent)) ?? (X)
+  - Behaviors have state? Or should pass all parameters as function calls? (X)
+    - Behaviors should store data across Components (X)
+    - Therefore, no internal state (X)
+    - Therefore, a single Behavior instance per behavior (X)
+    - BehaviorRegistry analogus to ArchetypeRegistery? (X)
+    - map.json: how do objects specify their behaviors...? (X)
   - COMPLETE WHEN:
-    - Can open a door
+    - Can open a door (X)
       - Trigger animation
       - Update entity state after a certain point (eg remove collision component)
-    - Can pass through door
-  - RIP trello board or where-ever the fuck i was writing this shit down
-  
+    - Can pass through door (X)
+  - RIP trello board or where-ever the fuck i was writing this shit down (X)
+ 
+ - WORST TODO LIST EVER HOW DO I MARK THINGS OFF (X)
+   - WITH A POWERFUL (X) MARK LIKE THIS: (X)
