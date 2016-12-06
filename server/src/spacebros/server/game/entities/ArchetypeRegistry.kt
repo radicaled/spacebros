@@ -23,7 +23,7 @@ class ArchetypeRegistry(val world: World) {
     }
 }
 
-// TODO: need to move assembly of archetypes into an s-expression based file
+// TODO: need to move assembly of behaviors into an s-expression based file
 // or maybe just some groovy scripts.
 fun makeRegistry(world: World): ArchetypeRegistry {
     val archetypeRegistry = ArchetypeRegistry(world)

@@ -1,0 +1,22 @@
+- Figure out why there's two of the same entities in the client
+  - Probably sent the message twice, but why?
+  - Client should ignore dupes, too
+- Remove the libgdx client -- it's out of date and not working
+- Archetypes should use an s-tree (or any s-exp) for definition -- or Groovy?
+- Behavior system to script entities like doors.
+  - Legit don't remember how I was going to compose this system.
+  - BehaviorSystem.execute(BehaviorComponent) ->
+    BehaviorComponent(val behaviors: listOf(BehaviorComponent)) ??
+  - Behaviors have state? Or should pass all parameters as function calls?
+    - Behaviors should store data across Components
+    - Therefore, no internal state
+    - Therefore, a single Behavior instance per behavior
+    - BehaviorRegistry analogus to ArchetypeRegistery?
+    - map.json: how do objects specify their behaviors...?
+  - COMPLETE WHEN:
+    - Can open a door
+      - Trigger animation
+      - Update entity state after a certain point (eg remove collision component)
+    - Can pass through door
+  - RIP trello board or where-ever the fuck i was writing this shit down
+  

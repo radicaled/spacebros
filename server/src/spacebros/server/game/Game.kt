@@ -11,12 +11,16 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import spacebros.networking.Messages
+import spacebros.server.game.behaviors.Behavior
+import spacebros.server.game.behaviors.BehaviorRegistry
+import spacebros.server.game.behaviors.makeBehaviorRegistry
 import spacebros.server.game.components.*
 import spacebros.server.game.components.map.EmptyTile
 import spacebros.server.game.components.map.TileLayer
 import spacebros.server.game.components.map.TiledMap
 import spacebros.server.game.entities.ArchetypeRegistry
 import spacebros.server.game.entities.makeRegistry
+import spacebros.server.game.systems.BehaviorSystem
 import spacebros.server.game.systems.CollisionSystem
 import spacebros.server.game.systems.MoveSystem
 import java.io.File
@@ -33,17 +37,22 @@ class GameVerticle : AbstractVerticle() {
     var lastTickAt = LocalDateTime.MIN
 
     val archetypeRegistry: ArchetypeRegistry
-
+    val behaviorRegistry: BehaviorRegistry
     val connectionHub = ConnectionHub()
+    val intentQueue = IntentQueue()
 
     init {
         val config = WorldConfigurationBuilder()
                 .with(TagManager())
                 .with(CollisionSystem())
                 .with(MoveSystem(connectionHub))
+                .with(BehaviorSystem(intentQueue))
                 .build()
+        config
+                .register("ConnectionHub", connectionHub)
         world = World(config)
         archetypeRegistry = makeRegistry(world)
+        behaviorRegistry  = makeBehaviorRegistry()
     }
 
     override fun start() {
@@ -99,8 +108,14 @@ class GameVerticle : AbstractVerticle() {
             is Messages.SynchronizeRequest -> handleSynchronize(player, message)
             is Messages.MoveDirection -> handleMovement(player, message)
             is Messages.TextMessage -> handleTextMessage(player, message)
+            is Messages.Interaction -> handleInteractionMessage(player, message)
         }
 
+    }
+
+    private fun handleInteractionMessage(player: Player, message: Messages.Interaction) {
+        val intent = Intent(player.entityId, message.entityId, message.action)
+        intentQueue.append(intent)
     }
 
     private fun handleTextMessage(player: Player, message: Messages.TextMessage) {
@@ -218,14 +233,24 @@ class GameVerticle : AbstractVerticle() {
         val map = mapper.readValue(fileData, Map::class.java)
         // TODO: clean up once formalized
         map.entities.forEach { mapEntity ->
+            val behaviors = arrayListOf<Behavior>()
             val archetype = if (archetypeRegistry.has(mapEntity.type!!)) {
                 archetypeRegistry.get(mapEntity.type!!)
             } else {
                 archetypeRegistry.get("visual")
             }
+            // TODO: map -> filter -> ?
+            // what about error reporting (eg no matching behavior?)
+            mapEntity.behaviors.forEach { behaviorName ->
+                if (behaviorRegistry.has(behaviorName))
+                    behaviors.add(behaviorRegistry.get(behaviorName))
+            }
 
             // TODO: must be some way to clean this up
             val entity = world.createEntity(archetype)
+            if (behaviors.size > 0) {
+                entity.edit().add(BehaviorComponent(behaviors))
+            }
             val tc = entity.getComponent(TypeComponent::class.java)
             val pc = entity.getComponent(PositionComponent::class.java)
             val tg = entity.getComponent(TileGraphicComponent::class.java)

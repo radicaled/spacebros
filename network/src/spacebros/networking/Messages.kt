@@ -61,5 +61,9 @@ object Messages {
     data class TextMessage(val message: String, val textType: TextType) : RootMessage {
         var entityId: Int? = null
     }
+
+    data class Interaction(val entityId: Int, val action: String) : RootMessage
+    // TODO: terrible idea or great idea
+    data class UpdateGraphic(val entityId: Int, val graphic: Graphic) : RootMessage
 }
 
