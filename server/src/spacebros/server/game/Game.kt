@@ -52,7 +52,7 @@ class GameVerticle : AbstractVerticle() {
                 .register("ConnectionHub", connectionHub)
         world = World(config)
         archetypeRegistry = makeRegistry(world)
-        behaviorRegistry  = makeBehaviorRegistry()
+        behaviorRegistry  = makeBehaviorRegistry(world)
     }
 
     override fun start() {

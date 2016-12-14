@@ -2,7 +2,7 @@ package spacebros.server.game.behaviors
 
 import com.artemis.World
 
-class BehaviorRegistry() {
+class BehaviorRegistry(val world: World) {
     val behaviors = hashMapOf<String, Behavior>()
 
     fun has(type: String): Boolean {
@@ -11,6 +11,7 @@ class BehaviorRegistry() {
 
     fun register(type: String, behavior: Behavior) {
         if (has(type)) throw IllegalArgumentException("A behavior instance for $type already exists!")
+        world.inject(behavior)
         behaviors[type] = behavior
     }
 
@@ -23,10 +24,10 @@ class BehaviorRegistry() {
 
 // TODO: need to move assembly of behaviors into an s-expression based file
 // or maybe just some groovy scripts.
-fun makeBehaviorRegistry(): BehaviorRegistry {
-    val behaviorRegistry = BehaviorRegistry()
+fun makeBehaviorRegistry(world: World): BehaviorRegistry {
+    val behaviorRegistry = BehaviorRegistry(world)
 
-    behaviorRegistry.register("door", DoorBehavior())
+    behaviorRegistry.register("door", DoorBehavior(world))
 
     return behaviorRegistry
 }

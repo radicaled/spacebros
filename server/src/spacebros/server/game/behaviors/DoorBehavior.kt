@@ -1,6 +1,7 @@
 package spacebros.server.game.behaviors
 
 import com.artemis.World
+import com.artemis.annotations.Wire
 import spacebros.networking.Messages
 import spacebros.server.game.ConnectionHub
 import spacebros.server.game.Intent
@@ -8,15 +9,18 @@ import spacebros.server.game.components.CollisionComponent
 import spacebros.server.game.components.DoorComponent
 import spacebros.server.game.components.TileGraphicComponent
 
-class DoorBehavior : Behavior() {
-    override fun execute(world: World, intent: Intent, hub: ConnectionHub) {
+class DoorBehavior(override val world: World) : Behavior() {
+    @Wire(name = "ConnectionHub")
+    lateinit var hub: ConnectionHub
+
+    override fun execute(intent: Intent) {
         when(intent.actionName) {
-            "use" -> handleOpenAction(world, intent, hub)
+            "use" -> handleOpenAction(intent)
             else -> print("Received this: ${intent.actionName}")
         }
     }
 
-    fun handleOpenAction(world: World, intent: Intent, hub: ConnectionHub) {
+    fun handleOpenAction(intent: Intent) {
         val doorEntity = world.getEntity(intent.targetEntityId)
         val doorComponent = doorEntity.getComponent(DoorComponent::class.java)
         if (doorComponent != null) {

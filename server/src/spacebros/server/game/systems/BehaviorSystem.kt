@@ -19,8 +19,6 @@ class BehaviorSystem(val intentQueue: IntentQueue) : BaseEntitySystem(aspects) {
     // TODO: what's the action/performance penalty for players on an active server?
     val drainEveryTick = 100
 
-    @Wire(name = "ConnectionHub")
-    lateinit var connectionHub: ConnectionHub
     lateinit var behaviorMapper: ComponentMapper<BehaviorComponent>
 
     override fun processSystem() {
@@ -29,7 +27,7 @@ class BehaviorSystem(val intentQueue: IntentQueue) : BaseEntitySystem(aspects) {
         intents.filter { actives.contains(it.targetEntityId) }.forEach { intent ->
             val behaviorComponent = behaviorMapper.get(intent.targetEntityId)
             behaviorComponent.behaviors.forEach { behavior ->
-                behavior.execute(world, intent, connectionHub)
+                behavior.execute(intent)
             }
 
         }
