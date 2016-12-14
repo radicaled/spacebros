@@ -23,6 +23,7 @@ class DoorBehavior(override val world: World) : Behavior() {
     fun handleOpenAction(intent: Intent) {
         val doorEntity = world.getEntity(intent.targetEntityId)
         val doorComponent = doorEntity.getComponent(DoorComponent::class.java)
+        val collisionComponent = doorEntity.getComponent(CollisionComponent::class.java)
         if (doorComponent != null) {
             print("Dummy routine to check door access")
             // TODO: test code; just remove the component and open the door?
@@ -36,7 +37,7 @@ class DoorBehavior(override val world: World) : Behavior() {
             // TODO: so sometimes the collision component comes back or isn't removed -- can't remember what
             // TODO: the artemis docs say
             doorComponent.doorState = DoorComponent.DoorState.OPEN
-            doorEntity.edit().remove(CollisionComponent::class.java)
+            collisionComponent.collisionState = CollisionComponent.CollisionState.INACTIVE
 
             val animateMessage = Messages.Animate(
                     intent.targetEntityId,
