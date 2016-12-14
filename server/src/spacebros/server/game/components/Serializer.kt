@@ -27,7 +27,6 @@ class ClientSerializer {
     private fun serialize(component: Component) : Pair<String, Map<String, Any>> {
         val klass = component.javaClass
         val componentName = klass.getAnnotation(ComponentName::class.java).name
-        println("Fields in ${klass.name}: ${klass.fields.count()}")
 
         val componentFieldData = klass.fields
                 .filter { it.isAnnotationPresent(ClientValue::class.java) }

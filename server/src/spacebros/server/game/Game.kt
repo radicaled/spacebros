@@ -173,7 +173,6 @@ class GameVerticle : AbstractVerticle() {
 
     fun sendEntity(gameConnection: GameConnection, entityId: Int) {
         val message = createEntity(entityId)
-        print(Messages.encode(message))
         gameConnection.sendData(Messages.encode(message))
     }
 
