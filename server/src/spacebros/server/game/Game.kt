@@ -167,7 +167,6 @@ class GameVerticle : AbstractVerticle() {
         val entity = world.getEntity(player.entityId)
         val pc = entity.getComponent(PositionComponent::class.java)
         val msg = Messages.SetCamera(Messages.Position(pc.x, pc.y, pc.z))
-        connectionHub.broadcast(createEntity(player.entityId))
         connectionHub.send(player.entityId, msg)
     }
 
