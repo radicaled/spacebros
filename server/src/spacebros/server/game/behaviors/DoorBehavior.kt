@@ -30,18 +30,21 @@ class DoorBehavior(override val world: World) : Behavior() {
             // TODO: animation subroutine
             // TODO: remove hard-coding
 
-
-
-            // TODO: START TERRIBLE IDEA
-            // TODO: there's some caching involved in removing a component
-            // TODO: so sometimes the collision component comes back or isn't removed -- can't remember what
-            // TODO: the artemis docs say
-            doorComponent.doorState = DoorComponent.DoorState.OPEN
-            collisionComponent.collisionState = CollisionComponent.CollisionState.INACTIVE
+            // TODO: cleanup?
+            val animationName: String
+            if (doorComponent.doorState == DoorComponent.DoorState.OPEN) {
+                doorComponent.doorState = DoorComponent.DoorState.CLOSED
+                collisionComponent.collisionState = CollisionComponent.CollisionState.ACTIVE
+                animationName = "close"
+            } else {
+                doorComponent.doorState = DoorComponent.DoorState.OPEN
+                collisionComponent.collisionState = CollisionComponent.CollisionState.INACTIVE
+                animationName = "open"
+            }
 
             val animateMessage = Messages.Animate(
                     intent.targetEntityId,
-                    "open"
+                    animationName
             )
             val stateMessage = Messages.UpdateEntity(
                     intent.targetEntityId,
@@ -49,8 +52,6 @@ class DoorBehavior(override val world: World) : Behavior() {
             )
             hub.broadcast(animateMessage)
             hub.broadcast(stateMessage)
-            // TODO: END TERRIBLE IDEA
-
 
             // TODO: implement the below
             // Check MY access level, if any
