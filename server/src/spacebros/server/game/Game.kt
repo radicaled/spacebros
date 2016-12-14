@@ -2,6 +2,7 @@ package spacebros.server.game
 
 import com.artemis.*
 import com.artemis.managers.TagManager
+import com.artemis.utils.Bag
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
@@ -28,6 +29,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.*
 
 class GameVerticle : AbstractVerticle() {
     val logger: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -40,6 +42,7 @@ class GameVerticle : AbstractVerticle() {
     val behaviorRegistry: BehaviorRegistry
     val connectionHub = ConnectionHub()
     val intentQueue = IntentQueue()
+    val clientSerializer = ClientSerializer()
 
     init {
         val config = WorldConfigurationBuilder()
@@ -50,6 +53,7 @@ class GameVerticle : AbstractVerticle() {
                 .build()
         config
                 .register("ConnectionHub", connectionHub)
+                .register("ClientSerializer", clientSerializer)
         world = World(config)
         archetypeRegistry = makeRegistry(world)
         behaviorRegistry  = makeBehaviorRegistry(world)
@@ -169,21 +173,18 @@ class GameVerticle : AbstractVerticle() {
 
     fun sendEntity(gameConnection: GameConnection, entityId: Int) {
         val message = createEntity(entityId)
+        print(Messages.encode(message))
         gameConnection.sendData(Messages.encode(message))
     }
 
     private fun createEntity(entityId: Int): Messages.CreateEntity {
         val entity = world.getEntity(entityId)
-        val tc = entity.getComponent(TypeComponent::class.java)
-        val pc = entity.getComponent(PositionComponent::class.java)
-        val tg = entity.getComponent(TileGraphicComponent::class.java)
-        val nc = entity.getComponent(NameComponent::class.java)
+        val bag = Bag<Component>()
+        entity.getComponents(bag)
 
-        val message = Messages.CreateEntity(entityId,
-                type = tc.name,
-                name = nc?.name,
-                position = Messages.Position(pc.x, pc.y, pc.z),
-                graphic = Messages.Graphic(tg.tileId, tg.graphicFile)
+        val message = Messages.CreateEntity(
+                entityId,
+                clientSerializer.serialize(bag)
         )
         return message
     }

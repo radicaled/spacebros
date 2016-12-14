@@ -7,7 +7,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 object Messages {
     val mapper = jacksonObjectMapper()
-            .enableDefaultTyping()
+            // TODO: wtf did I enable this for? was it for the libgdx client?
+//            .enableDefaultTyping()
             .registerKotlinModule().apply {
                 enable(SerializationFeature.INDENT_OUTPUT)
     }
@@ -24,7 +25,7 @@ object Messages {
         }
     }
 
-    data class Graphic(val tileId: Int, val file: String)
+    data class Graphic(val tileId: Int)
 
     enum class Direction {
         NORTH,
@@ -47,10 +48,8 @@ object Messages {
 
     class SynchronizeRequest : RootMessage
 
-    data class CreateEntity(val entityId: Int, val type: String,
-                            val name: String?,
-                            val position: Position,
-                            val graphic: Graphic) : RootMessage
+    data class CreateEntity(val entityId: Int, val state: Map<String, Any>) : RootMessage
+    data class UpdateEntity(val entityId: Int, val state: Map<String, Any>) : RootMessage
     data class DeleteEntity(val entityId: Int) : RootMessage
 
     data class SetCamera(val position: Position) : RootMessage
@@ -63,7 +62,7 @@ object Messages {
     }
 
     data class Interaction(val entityId: Int, val action: String) : RootMessage
-    // TODO: terrible idea or great idea
-    data class UpdateGraphic(val entityId: Int, val graphic: Graphic) : RootMessage
+
+    data class Animate(val entityId: Int, val animation: String) : RootMessage
 }
 
