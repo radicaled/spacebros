@@ -5463,5 +5463,13 @@
       "y" : 8,
       "z" : 4
     }
+  }, {
+    "type" : "butcher_knife",
+    "graphic": 7,
+    "position": {
+      "x" : 7,
+      "y" : 5,
+      "z" : 4
+    }
   } ]
 }
