@@ -9,6 +9,7 @@ object Archetypes {
             .add(PositionComponent::class.java)
             .add(TileGraphicComponent::class.java)
             .add(NameComponent::class.java)
+            .add(VisibilityComponent::class.java)
 
     val player: ArchetypeBuilder = ArchetypeBuilder()
             .add(TypeComponent::class.java)
@@ -16,6 +17,7 @@ object Archetypes {
             .add(TileGraphicComponent::class.java)
             .add(CollisionComponent::class.java)
             .add(NameComponent::class.java)
+            .add(VisibilityComponent::class.java)
 
     val wall: ArchetypeBuilder = ArchetypeBuilder()
             .add(TypeComponent::class.java)
@@ -23,6 +25,7 @@ object Archetypes {
             .add(TileGraphicComponent::class.java)
             .add(CollisionComponent::class.java)
             .add(NameComponent::class.java)
+            .add(VisibilityComponent::class.java)
 
     val door: ArchetypeBuilder = ArchetypeBuilder()
             .add(TypeComponent::class.java)
@@ -31,4 +34,5 @@ object Archetypes {
             .add(CollisionComponent::class.java)
             .add(NameComponent::class.java)
             .add(DoorComponent::class.java)
+            .add(VisibilityComponent::class.java)
 }

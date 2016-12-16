@@ -158,8 +158,9 @@ class GameVerticle : AbstractVerticle() {
 
 
     fun synchronizePlayer(player: Player) {
-        // TODO: don't sync all entities.
-        val entities = world.aspectSubscriptionManager.get(Aspect.all()).entities
+        // TODO: only sync entities in sight of player
+        val entityAspects = Aspect.all(VisibilityComponent::class.java)
+        val entities = world.aspectSubscriptionManager.get(entityAspects).entities
         entities.data.forEach { entityId ->
             sendEntity(player.gameConnection, entityId)
         }
