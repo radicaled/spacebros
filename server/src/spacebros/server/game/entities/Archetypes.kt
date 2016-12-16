@@ -17,6 +17,7 @@ object Archetypes {
             .add(TileGraphicComponent::class.java)
             .add(CollisionComponent::class.java)
             .add(NameComponent::class.java)
+            .add(InventoryComponent::class.java)
             .add(VisibilityComponent::class.java)
 
     val wall: ArchetypeBuilder = ArchetypeBuilder()
@@ -35,4 +36,14 @@ object Archetypes {
             .add(NameComponent::class.java)
             .add(DoorComponent::class.java)
             .add(VisibilityComponent::class.java)
+
+    val butcherKnife: ArchetypeBuilder = ArchetypeBuilder()
+            .add(TypeComponent::class.java)
+            .add(PositionComponent::class.java)
+            .add(TileGraphicComponent::class.java)
+            .add(CollisionComponent::class.java)
+            .add(NameComponent::class.java)
+            .add(DoorComponent::class.java)
+            .add(VisibilityComponent::class.java)
+            .add(MovableComponent::class.java)
 }

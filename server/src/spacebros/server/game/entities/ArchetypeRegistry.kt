@@ -34,6 +34,7 @@ fun makeRegistry(world: World): ArchetypeRegistry {
     archetypeRegistry.register("door", Archetypes.door)
     archetypeRegistry.register("Doorcomglass", Archetypes.door)
     archetypeRegistry.register("Doorsecglass", Archetypes.door)
+    archetypeRegistry.register("butcher_knife", Archetypes.butcherKnife)
 
     return archetypeRegistry
 }
