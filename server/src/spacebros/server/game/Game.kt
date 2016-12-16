@@ -167,8 +167,11 @@ class GameVerticle : AbstractVerticle() {
         // Set the camera to their player's position?
         val entity = world.getEntity(player.entityId)
         val pc = entity.getComponent(PositionComponent::class.java)
-        val msg = Messages.SetCamera(Messages.Position(pc.x, pc.y, pc.z))
-        connectionHub.send(player.entityId, msg)
+        val cameraMessage = Messages.SetCamera(Messages.Position(pc.x, pc.y, pc.z))
+        val playerMessage = Messages.SetPlayerEntity(player.entityId)
+
+        connectionHub.send(player.entityId, cameraMessage)
+        connectionHub.send(player.entityId, playerMessage)
     }
 
     fun sendEntity(gameConnection: GameConnection, entityId: Int) {

@@ -53,6 +53,7 @@ object Messages {
     data class DeleteEntity(val entityId: Int) : RootMessage
 
     data class SetCamera(val position: Position) : RootMessage
+    data class SetPlayerEntity(val entityId: Int) : RootMessage
 
     data class MoveDirection(val direction: Direction) : RootMessage
     data class MoveToPosition(val entityId: Int, val position: Position) : RootMessage

@@ -9,5 +9,5 @@ import java.util.*
 class InventoryComponent : Component() {
     // TODO: only sync this to clients that need to know about inventory contents
     @ClientValue("contents")
-    val contents: ArrayList<Int> = arrayListOf()
+    val contents: HashSet<Int> = hashSetOf()
 }

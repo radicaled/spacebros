@@ -28,6 +28,7 @@ fun makeBehaviorRegistry(world: World): BehaviorRegistry {
     val behaviorRegistry = BehaviorRegistry(world)
 
     behaviorRegistry.register("door", DoorBehavior(world))
+    behaviorRegistry.register("lootable", LootableBehavior(world))
 
     return behaviorRegistry
 }

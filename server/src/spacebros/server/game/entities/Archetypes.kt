@@ -19,6 +19,7 @@ object Archetypes {
             .add(NameComponent::class.java)
             .add(InventoryComponent::class.java)
             .add(VisibilityComponent::class.java)
+            .add(PlayerComponent::class.java)
 
     val wall: ArchetypeBuilder = ArchetypeBuilder()
             .add(TypeComponent::class.java)
