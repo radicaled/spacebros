@@ -43,7 +43,6 @@ object Archetypes {
             .add(TileGraphicComponent::class.java)
             .add(CollisionComponent::class.java)
             .add(NameComponent::class.java)
-            .add(DoorComponent::class.java)
             .add(VisibilityComponent::class.java)
             .add(MovableComponent::class.java)
 }
