@@ -42,7 +42,6 @@ object Archetypes {
             .add(TypeComponent::class.java)
             .add(PositionComponent::class.java)
             .add(TileGraphicComponent::class.java)
-            .add(CollisionComponent::class.java)
             .add(NameComponent::class.java)
             .add(VisibilityComponent::class.java)
             .add(MovableComponent::class.java)

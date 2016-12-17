@@ -23,7 +23,6 @@ class CollisionSystem() : IteratingSystem(aspects) {
 
     lateinit var posMapper: ComponentMapper<PositionComponent>
     lateinit var moveMapper: ComponentMapper<MovementComponent>
-    lateinit var colMapper: ComponentMapper<CollisionComponent>
     lateinit var tMapper: ComponentMapper<TypeComponent>
 
     override fun process(entityId: Int) {
@@ -47,11 +46,9 @@ class CollisionSystem() : IteratingSystem(aspects) {
         val collidableEntities = world.aspectSubscriptionManager.get(collidableEntityAspect).entities
         val hasCollided = collidableEntities.data.any {
             if(it == entityId) return@any false
-            val otherEntityCollision = colMapper.get(it)
             val otherEntityPosition = posMapper.get(it)
 
-            otherEntityCollision.collisionState == CollisionComponent.CollisionState.ACTIVE
-                && otherEntityPosition.x == desiredX && otherEntityPosition.y == desiredY
+            otherEntityPosition.x == desiredX && otherEntityPosition.y == desiredY
         }
 
         if (hasCollided) {

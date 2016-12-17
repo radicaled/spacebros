@@ -23,7 +23,6 @@ class DoorBehavior(override val world: World) : Behavior() {
     fun handleOpenAction(intent: Intent) {
         val doorEntity = world.getEntity(intent.targetEntityId)
         val doorComponent = doorEntity.getComponent(DoorComponent::class.java)
-        val collisionComponent = doorEntity.getComponent(CollisionComponent::class.java)
         if (doorComponent != null) {
             print("Dummy routine to check door access")
             // TODO: test code; just remove the component and open the door?
@@ -34,11 +33,11 @@ class DoorBehavior(override val world: World) : Behavior() {
             val animationName: String
             if (doorComponent.doorState == DoorComponent.DoorState.OPEN) {
                 doorComponent.doorState = DoorComponent.DoorState.CLOSED
-                collisionComponent.collisionState = CollisionComponent.CollisionState.ACTIVE
+                doorEntity.edit().add(CollisionComponent())
                 animationName = "close"
             } else {
                 doorComponent.doorState = DoorComponent.DoorState.OPEN
-                collisionComponent.collisionState = CollisionComponent.CollisionState.INACTIVE
+                doorEntity.edit().remove(CollisionComponent::class.java)
                 animationName = "open"
             }
 
