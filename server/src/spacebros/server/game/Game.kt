@@ -167,9 +167,11 @@ class GameVerticle : AbstractVerticle() {
         // TODO: only sync entities in sight of player
         val entityAspects = Aspect.all(VisibilityComponent::class.java)
         val entities = world.aspectSubscriptionManager.get(entityAspects).entities
-        entities.data.forEach { entityId ->
+        (0..entities.size() - 1).forEach {
+            val entityId = entities[it]
             sendEntity(player.gameConnection, entityId)
         }
+
         // Set the camera to their player's position?
         val entity = world.getEntity(player.entityId)
         val pc = entity.getComponent(PositionComponent::class.java)
