@@ -60,6 +60,12 @@ class GameVerticle : AbstractVerticle() {
     }
 
     override fun start() {
+        vertx.exceptionHandler {
+            vertx.close {
+                logger.error("Terminating verticle...")
+                System.exit(-1)
+            }
+        }
 //        bootstrapMap()
         bootstrapCustomMap()
 //        saveMap()
