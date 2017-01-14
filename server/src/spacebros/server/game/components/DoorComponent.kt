@@ -1,10 +1,11 @@
 package spacebros.server.game.components
 
 import com.artemis.Component
+import spacebros.server.game.components.annotations.ClientComponent
 import spacebros.server.game.components.annotations.ClientValue
-import spacebros.server.game.components.annotations.ComponentName
+import spacebros.server.game.components.annotations.ComponentMetadata
 
-@ComponentName("door")
+@ComponentMetadata("door", clientSync = true)
 class DoorComponent(defaultDoorState: DoorState = DoorState.CLOSED) : Component() {
     enum class DoorState {
         OPEN,

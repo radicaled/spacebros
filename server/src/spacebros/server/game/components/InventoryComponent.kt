@@ -2,10 +2,10 @@ package spacebros.server.game.components
 
 import com.artemis.Component
 import spacebros.server.game.components.annotations.ClientValue
-import spacebros.server.game.components.annotations.ComponentName
+import spacebros.server.game.components.annotations.ComponentMetadata
 import java.util.*
 
-@ComponentName("inventory")
+@ComponentMetadata("inventory", clientSync = true)
 class InventoryComponent : Component() {
     // TODO: only sync this to clients that need to know about inventory contents
     @ClientValue("contents")

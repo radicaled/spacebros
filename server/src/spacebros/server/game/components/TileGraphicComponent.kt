@@ -2,9 +2,9 @@ package spacebros.server.game.components
 
 import com.artemis.Component
 import spacebros.server.game.components.annotations.ClientValue
-import spacebros.server.game.components.annotations.ComponentName
+import spacebros.server.game.components.annotations.ComponentMetadata
 
-@ComponentName("tileGraphic")
+@ComponentMetadata("tileGraphic", clientSync = true)
 class TileGraphicComponent : Component() {
     var graphicFile: String = ""
     @ClientValue("tileId")

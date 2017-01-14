@@ -1,8 +1,9 @@
 package spacebros.server.game.components
 
 import com.artemis.Component
+import spacebros.server.game.components.annotations.ClientComponent
 import spacebros.server.game.components.annotations.ClientValue
-import spacebros.server.game.components.annotations.ComponentName
+import spacebros.server.game.components.annotations.ComponentMetadata
 import kotlin.reflect.jvm.properties
 import kotlin.reflect.memberProperties
 
@@ -21,12 +22,13 @@ class ClientSerializer {
 
     fun canSerialize(component: Component): Boolean {
         val klass = component.javaClass
-        return klass.isAnnotationPresent(ComponentName::class.java)
+        return klass.isAnnotationPresent(ComponentMetadata::class.java) &&
+                klass.getAnnotation(ComponentMetadata::class.java).clientSync
     }
 
     private fun serialize(component: Component) : Pair<String, Map<String, Any>> {
         val klass = component.javaClass
-        val componentName = klass.getAnnotation(ComponentName::class.java).name
+        val componentName = klass.getAnnotation(ComponentMetadata::class.java).name
 
         val componentFieldData = klass.fields
                 .filter { it.isAnnotationPresent(ClientValue::class.java) }
