@@ -6,6 +6,7 @@ import com.artemis.annotations.Wire
 import spacebros.networking.Messages
 import spacebros.server.game.ConnectionHub
 import spacebros.server.game.Intent
+import spacebros.server.game.active
 import spacebros.server.game.components.ClientSerializer
 import spacebros.server.game.components.InventoryComponent
 import spacebros.server.game.components.PlayerComponent
@@ -41,7 +42,7 @@ class LootableBehavior(override val world: World) : Behavior() {
         val playerEntities = world.aspectSubscriptionManager.get(entityAspects).entities
 
         // TODO: more performant way of updating players?
-        playerEntities.data.forEach { entityId ->
+        playerEntities.active().forEach { entityId ->
             if (entityId != intent.invokingEntityId)
                 hub.send(entityId, message)
         }

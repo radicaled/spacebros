@@ -4,6 +4,7 @@ import com.artemis.Aspect
 import com.artemis.ComponentMapper
 import com.artemis.systems.IteratingSystem
 import spacebros.networking.Messages
+import spacebros.server.game.active
 import spacebros.server.game.components.CollisionComponent
 import spacebros.server.game.components.MovementComponent
 import spacebros.server.game.components.PositionComponent
@@ -44,7 +45,7 @@ class CollisionSystem() : IteratingSystem(aspects) {
 
         // do any other entities unpassable entities exist at the desired x, y, z coordinates?
         val collidableEntities = world.aspectSubscriptionManager.get(collidableEntityAspect).entities
-        val hasCollided = collidableEntities.data.any {
+        val hasCollided = collidableEntities.active().any {
             if(it == entityId) return@any false
             val otherEntityPosition = posMapper.get(it)
 

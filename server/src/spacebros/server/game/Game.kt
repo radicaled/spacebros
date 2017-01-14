@@ -167,7 +167,7 @@ class GameVerticle : AbstractVerticle() {
         // TODO: only sync entities in sight of player
         val entityAspects = Aspect.all(VisibilityComponent::class.java)
         val entities = world.aspectSubscriptionManager.get(entityAspects).entities
-        (0..entities.size() - 1).forEach {
+        entities.active().forEach {
             val entityId = entities[it]
             sendEntity(player.gameConnection, entityId)
         }
@@ -209,7 +209,7 @@ class GameVerticle : AbstractVerticle() {
         val map = Map()
         val entities = world.aspectSubscriptionManager.get(Aspect.all()).entities
         val filenames = hashSetOf<String>()
-        entities.data.forEach { entityId ->
+        entities.active().forEach { entityId ->
             val entity = world.getEntity(entityId)
             val tc = entity.getComponent(TypeComponent::class.java)
             val pc = entity.getComponent(PositionComponent::class.java)
